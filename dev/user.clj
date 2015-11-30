@@ -6,11 +6,13 @@
             [clojure.test                 :as test]
             [com.stuartsierra.component   :as component]
             [clojure.tools.namespace.repl :refer (refresh refresh-all)]
-            [coolring.system              :as coolring]))
+            [coolring.system              :as coolring]
+            [ragtime.repl                 :as ragtime]
+            [ragtime.jdbc                 :as jdbc]))
 
 (def system nil)
 
-(def config {:http {:port 3333}})
+(def config {:http {:port 3332}})
 
 (defn init
   "Constructs the current development system."
@@ -37,3 +39,8 @@
 (defn reset []
   (stop)
   (refresh :after `go))
+
+(defn migrate []
+  (let [db (jdbc/sql-database (:db system) {:migrations-table "migrations"})]
+    (ragtime/migrate {:datastore db
+                      :migrations (jdbc/load-resources "migrations")})))

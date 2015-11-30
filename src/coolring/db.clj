@@ -24,7 +24,8 @@
       (assoc component :datasource ds)))
 
   (stop [component]
-    (close-datasource datasource)
+    (if datasource
+      (close-datasource datasource))
     (assoc component :datasource nil)))
 
 (defn create-database [config]
