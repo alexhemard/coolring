@@ -7,22 +7,36 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[bidi "1.22.0"]
-                 [com.cemerick/friend "0.2.1"]
+                 [com.cemerick/friend "0.2.3"]
                  [com.stuartsierra/component "0.3.0"]
+                 [cheshire "5.6.3"]
+                 [crypto-password "0.1.3"]
                  [environ "1.0.1"]
                  [hiccup "1.0.5"]
-                 [hikari-cp "1.4.0"]
-                 [liberator "0.14.0"]
+                 [hikari-cp "1.7.2"]
+                 [liberator "0.14.1"]
                  [org.clojure/clojure "1.7.0"]
-                 [org.postgresql/postgresql "9.4-1206-jdbc42"]
-                 [ragtime "0.5.2"]
-                 [ring-jetty-component "0.3.0"]
-                 [ring/ring "1.4.0"]
-                 [ring/ring-defaults "0.1.5"]]
+                 [org.clojure/java.jdbc "0.6.2-alpha2"]
+                 [org.postgresql/postgresql "9.4.1209"]
+                 [ragtime "0.6.1"]
+                 [ring-jetty-component "0.3.1"]
+                 [ring/ring "1.5.0"]
+                 [ring/ring-defaults "0.2.1"]
+                 [yesql "0.5.3"]]
+
+  :source-paths ["src/clj" "src/sql"]
+
+  :aliases {"gulp"        ["shell" "node_modules/gulp/bin/gulp.js" "build"]
+            "npm-install" ["shell" "npm" "install"]}
 
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.11"]]
-                   :source-paths ["dev"]}}
+                   :source-paths ["dev"]}
+             :uberjar {:aot :all
+                       :prep-tasks ^:replace ["npm-install"
+                                              "gulp"
+                                              "javac"
+                                              "compile"]}}
+  
+  :repl-options {:init-ns dev}
 
-  :plugins [[cider/cider-nrepl "0.9.1"]
-            [lein-environ "1.0.1"]
-            [lein-less "1.7.5"]])
+  :plugins [[lein-environ "1.0.1"]])

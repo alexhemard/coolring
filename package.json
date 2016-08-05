@@ -1,0 +1,25 @@
+{
+  "name": "coolring",
+  "version": "1.0.0",
+  "private": true,
+  
+  "engines": {
+    "node": "6.2.2"
+  },
+
+  "dependencies": {
+    "gulp": "3.9.1",
+    "gulp-sass": "2.3.2",
+    "gulp-rename": "1.2.2",
+    "gulp-buster": "1.0.2",
+    "gulp-rework": "1.2.0",
+    "gulp-clean": "0.3.2",
+    "gulp-clean-css": "2.0.10",
+    "gulp-sourcemaps": "1.6.0",
+    "vinyl-paths": "2.1.0",
+    "del": "2.2.1",
+    "rework-plugin-url": "1.1.0",
+    "normalize.css": "4.1.1"
+  }
+}
+
