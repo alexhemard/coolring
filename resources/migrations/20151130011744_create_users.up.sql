@@ -1,7 +1,7 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE SEQUENCE users_id_seq;
 
 CREATE TABLE users (
-  id         uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+  id         int8 PRIMARY KEY DEFAULT nextval('users_id_seq'::regclass),
   name       character varying(255),
   email      character varying(255) NOT NULL,
   hashword   character varying(1024),

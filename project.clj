@@ -6,7 +6,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[bidi "1.22.0"]
+  :dependencies [[bidi "2.0.9"]
                  [com.cemerick/friend "0.2.3"]
                  [com.stuartsierra/component "0.3.0"]
                  [cheshire "5.6.3"]
@@ -24,7 +24,7 @@
                  [ring/ring-defaults "0.2.1"]
                  [yesql "0.5.3"]]
 
-  :source-paths ["src/clj" "src/sql"]
+  :source-paths ["src/clj" "src/cljc" "src/sql"]
 
   :aliases {"gulp"        ["shell" "node_modules/gulp/bin/gulp.js" "build"]
             "npm-install" ["shell" "npm" "install"]}

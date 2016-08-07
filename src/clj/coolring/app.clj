@@ -3,11 +3,12 @@
             [ring.middleware.defaults    :refer [wrap-defaults site-defaults]]
             [ring.util.request           :as req]
             [ring.util.response          :as resp]
-            [ring.middleware.file        :refer [file-request]]            
+            [ring.middleware.file        :refer [file-request]]
             [bidi.bidi                   :as bidi]
             [bidi.ring                   :refer [redirect make-handler resources-maybe]]
             [cemerick.friend             :as friend]
             [cemerick.friend.workflows   :refer [make-auth]]
+            [coolring.routes             :refer [routes]]
             [coolring.query              :as query]
             [coolring.handlers           :as h]
             [crypto.password.pbkdf2      :as password]))
@@ -19,10 +20,6 @@
                             (java.net.URLEncoder/encode (:email form-params)))]
       (str "/login" redirect-params))))
 
-(defn login [ctx req]
-  (-> (resp/response "login")
-    (resp/content-type "text/html")))
-
 (defn login-workflow
   [ctx]
   (let [{:keys [db]} ctx]
@@ -32,7 +29,7 @@
         (let [creds {:email    (get form-params    :email)
                      :password (get form-params :password)}
               {:keys [id email password]} creds
-              {:keys [email hashword] :as user} (first (query/user-by-email db {:email email}))]
+              {:keys [email hashword] :as user} (first (query/user-by-email {:email email} {:connection db}))]
           (if (password/check password hashword)
             (cemerick.friend.workflows/make-auth
               {:identity id
@@ -43,14 +40,6 @@
   (-> (resp/response "cool :)")
     (resp/content-type "text/html")))
 
-(def routes
-  ["/" [[""         :index]
-        ["login"    :login]
-        ["register" :register]
-        ["rings" [["" :rings
-                   :id :ring]]]]
-   true :not-found])
-
 (extend-protocol bidi.ring/Ring
   bidi.ring.ResourcesMaybe
   (request [resource req _]
@@ -59,19 +48,20 @@
 
 (defn handler-map [ctx]
   {:index       index
-   :login      (partial login ctx)
-   :users      (h/users ctx)
-   :user       (h/user  ctx)
-   :rings      (h/rings ctx)
-   :ring       (h/ring  ctx)
-   :ring-sites (h/ring-sites ctx)
-   :sites      (h/ring  ctx)            
-   :not-found  (resources-maybe {:prefix "resources/public"})})
+   :login       (h/login ctx)
+   :register    (h/login ctx)
+   :user        (h/user  ctx)
+   :rings       (h/rings ctx)
+   :ring        (h/ring  ctx)
+   :create-ring (h/create-ring ctx)
+   :new-ring    (h/new-ring    ctx)
+   :approve-site (h/approve-site ctx)
+   :not-found   (resources-maybe {:prefix "resources/public"})})
 
 (defn app [ctx]
   (-> routes
     (make-handler (handler-map ctx))
-    (friend/authenticate {:workflows [(login-workflow ctx)]})
+    ; (friend/authenticate {:workflows [(login-workflow ctx)]})
     (wrap-defaults site-defaults)))
 
 (defrecord App [handler]

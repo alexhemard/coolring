@@ -1,8 +1,10 @@
+CREATE SEQUENCE rings_id_seq;
+
 CREATE TABLE rings (
-  id          uuid PRIMARY KEY not null DEFAULT uuid_generate_v4(),
+  id          int8 PRIMARY KEY DEFAULT nextval('rings_id_seq'::regclass),
   name        character varying(512) NOT NULL,
-  description character varying(512),
+  description character varying(2048),
   created_at  timestamp without time zone DEFAULT now(),
   updated_at  timestamp without time zone DEFAULT now(),
-  owner_id    uuid REFERENCES users (id)
+  owner_id    int8 REFERENCES users (id) NOT NULL
 );
