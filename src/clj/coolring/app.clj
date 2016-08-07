@@ -8,29 +8,27 @@
             [bidi.ring                   :refer [redirect make-handler resources-maybe]]
             [cemerick.friend             :as friend]
             [cemerick.friend.workflows   :refer [make-auth]]
+            [cemerick.friend.credentials :refer [bcrypt-verify]]            
             [coolring.routes             :refer [routes]]
             [coolring.query              :as query]
-            [coolring.handlers           :as h]
-            [crypto.password.pbkdf2      :as password]))
+            [coolring.handlers           :as h]))
 
 (defn login-failed
-  [{:keys [form-params params] :as request}]
+  [request]
   (ring.util.response/redirect
-    (let [redirect-params (str "&login_failed=Y&email="
-                            (java.net.URLEncoder/encode (:email form-params)))]
-      (str "/login" redirect-params))))
+    (str "/login" (str "?login_failed=Y"))))
 
 (defn login-workflow
   [ctx]
   (let [{:keys [db]} ctx]
-    (fn [{:keys [request-method params form-params] :as request}]
-      (when (:and (= "/login" (req/path-info request))
+    (fn [{:keys [request-method params] :as request}]
+      (when (and (= "/login" (req/path-info request))
                   (= :post request-method))
-        (let [creds {:email    (get form-params    :email)
-                     :password (get form-params :password)}
-              {:keys [id email password]} creds
-              {:keys [email hashword] :as user} (first (query/user-by-email {:email email} {:connection db}))]
-          (if (password/check password hashword)
+        (let [{:keys [email password]} params
+              user (query/user-by-email {:email email} {:connection db
+                                                        :result-set-fn first})
+              {:keys [id email hashword]} user]
+          (if (and user (bcrypt-verify password hashword))
             (cemerick.friend.workflows/make-auth
               {:identity id
                :email    email})
@@ -47,21 +45,22 @@
         (resp/not-found "not found yall"))))
 
 (defn handler-map [ctx]
-  {:index       index
-   :login       (h/login ctx)
-   :register    (h/login ctx)
-   :user        (h/user  ctx)
-   :rings       (h/rings ctx)
-   :ring        (h/ring  ctx)
-   :create-ring (h/create-ring ctx)
-   :new-ring    (h/new-ring    ctx)
-   :approve-site (h/approve-site ctx)
+  {:index           (h/index ctx)
+   :login           (h/login ctx)
+   :register        (h/register ctx)
+   :registration    (h/registration ctx)   
+   :rings           (h/rings ctx)
+   :ring            (h/ring  ctx)
+   :create-ring     (h/create-ring ctx)
+   :new-ring        (h/new-ring    ctx)
+   :approve-site    (h/approve-site ctx)
+   :deactivate-site (h/deactivate-site ctx)
    :not-found   (resources-maybe {:prefix "resources/public"})})
 
 (defn app [ctx]
   (-> routes
     (make-handler (handler-map ctx))
-    ; (friend/authenticate {:workflows [(login-workflow ctx)]})
+    (friend/authenticate {:workflows [(login-workflow ctx)]})
     (wrap-defaults site-defaults)))
 
 (defrecord App [handler]

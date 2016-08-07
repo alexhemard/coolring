@@ -3,6 +3,15 @@ SELECT *
 FROM users
 WHERE email = :email
 
+-- name: user-by-id
+SELECT *
+FROM users
+WHERE id = :id
+
+-- name: create-user<!
+INSERT INTO users
+(email, hashword) VALUES (:email, :hashword)
+
 -- name: ring-by-id
 SELECT *
 FROM rings
