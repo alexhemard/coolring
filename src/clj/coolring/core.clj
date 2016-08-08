@@ -20,4 +20,4 @@
   (ragtime/rollback (load-config)))
 
 (defn -main []
-  (migrate(start-system (system config))))
+  (start-system (system config)))
