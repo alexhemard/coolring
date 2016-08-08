@@ -33,7 +33,7 @@
    :maximum-pool-size  6})
 
 (defn db-spec []
-  (-> (URI. (env :DATABASE_URL
+  (-> (URI. (env :database-url
               "postgresql://postgres:postgres@localhost:5432/coolring"))
     (parse-properties-uri)
     (merge default-config)))
