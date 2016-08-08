@@ -34,10 +34,13 @@
   :source-paths ["src/clj" "src/cljc" "src/sql"]
 
   :aliases {"gulp"        ["shell" "node_modules/gulp/bin/gulp.js" "build"]
-            "npm-install" ["shell" "npm" "install"]}
+            "npm-install" ["shell" "npm" "install"]
+            "migrate"  ["run" "-m" "coolring.core/migrate"]
+            "rollback" ["run" "-m" "coolring.core/rollback"]}
 
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.11"]]
                    :source-paths ["dev"]}
+             :production {:repl-options {:init-ns coolring.core}}
              :uberjar {:aot :all
                        :prep-tasks ^:replace ["npm-install"
                                               "gulp"
