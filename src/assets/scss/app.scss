@@ -1,12 +1,10 @@
+@import "variables";
 @import "bootstrap";
+@import "components";
 
 body {
-  font-family: $font-family-serif;
-  background-color: lightblue;
-}
+  font-family: $font-family-monospace;
+  background-color: #eceeef;
 
-.submit-button {
-  @extend .btn;
-  @extend .btn-primary;  
+  padding-top: 5rem;
 }
-

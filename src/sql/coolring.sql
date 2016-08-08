@@ -17,9 +17,10 @@ SELECT *
 FROM rings
 WHERE id = :id
 
--- name: rings
+-- name: rings-by-owner
 SELECT *
 FROM rings
+WHERE owner_id = :owner_id
 
 -- name: approved-sites-for-ring
 SELECT *

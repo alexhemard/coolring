@@ -1,8 +1,9 @@
 (ns coolring.handlers
   (:require [liberator.core     :refer [resource defresource]]
+            [clojure.tools.logging :as log]
             [hiccup.page        :refer [html5 include-css include-js]]
             [hiccup.element     :refer [link-to]]
-            [hiccup.form        :as form]
+            [hiccup.form        :refer [form-to] :as form]
             [ring.util.response :refer [content-type response]]
             [cheshire.core      :as json]
             [bidi.bidi          :refer [path-for] :as bidi]
@@ -20,40 +21,49 @@
                              friend/current-authentication)
         user (query/user-by-id {:id identity} {:connection db
                                                :result-set-fn first})]
-    (when user {:identity user})))
+    (if user (assoc ctx :identity user) ctx)))
+
+(defn initialize-context [context]
+  (fn [ctx]
+    (-> ctx
+      (merge context)
+      (current-user))))
 
 (def authorization-required
-  {:authorized? current-user
+  {:authorized? (fn [ctx] (contains? ctx :identity))
    :handle-unauthorized (fn [ctx]
                           (friend/throw-unauthorized
                             (friend/identity (get ctx :request))
                             {}))
-   :allowed? current-user
+   :allowed? (fn [ctx] (contains? ctx :identity))
    :handle-forbidden (fn [ctx]
                        (friend/throw-unauthorized
                          (friend/identity (get ctx :request))
                          {}))})
 
-(defn form-to
-  [[method action] & body]
-  (if (contains? #{:head :get} method)
-    (form/form-to [method action] body)
-    (form/form-to [method action]
-      (anti-forgery/anti-forgery-field)
-      body)))
+(defn nav [ctx]
+  [:nav {:class "navigation"}
+   [:a {:class "brand" :href "/"} "coolring.club"]
+   (if-let [{:keys [email]} (:identity ctx)]
+     [:ul {:class "navigation-list"}
+      [:li {:class "navigation-item"} [:a {:href "/settings" :class "navigation-link"} email]]
+      [:li {:class "navigation-item"}
+       [:a {:class "navigation-button" :href "/rings/new"} "new ring"]]]
+     [:ul {:class "navigation-list"}     
+      [:li {:class "navigation-item"} [:a {:class "navigation-link" :href "/login"} "login"]]
+      [:li {:class "navigation-item"} [:a {:class "navigation-link" :href "/register"} "register"]]])])
 
-(defn page [title & body]
+(defn page [ctx title & body]
   (html5
     [:head
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-     
      [:title (str "coolring.club | " title)]
      (include-js  (js-asset  "app.js"))
      (include-css (css-asset "app.css"))
      [:body
+      (nav ctx)
       [:div {:class "container"}
-       [:nav [:h1 "coolring.club"]]
        body]]]))
 
 (defmulti link (fn [type entity] type))
@@ -63,24 +73,21 @@
 
 (defresource rings [ctx]
   authorization-required
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
-  :exists? (fn [{:keys [db]}]
-             {:rings (query/rings {} {:connection db})})
-  :handle-ok (fn [{:keys [rings]}]
-               (page "home"
-                 [:h2 "my rings"]
+  :exists? (fn [{:keys [db identity]}]
+             {:rings (query/rings-by-owner {:owner_id (:id identity)} {:connection db})})
+  :handle-ok (fn [{:keys [rings] :as ctx}]
+               (page ctx "home"
+                 [:h2 "my web rings"]
                  [:ul
                   (for [ring rings]
                     [:li [:div
-                          [:div (link :rings ring)]
-                          [:div (:description ring)]]])]
-                 (link-to "/rings/new" "new ring")
-                 )))
+                          [:div (link :rings ring)]]])])))
 
 (defresource ring [ctx]
   authorization-required
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
   :exists? (fn [{:keys [db request] :as ctx}]
              (let [{:keys [route-params]} request
@@ -90,7 +97,7 @@
                {:ring ring
                 :sites sites}))
   :handle-ok (fn [{:keys [ring sites] :as ctx}]
-               (page (str (:name ring))
+               (page ctx (str (:name ring))
                  [:h2 (:name ring)]
                  [:p (:description ring)]
                  [:h2 "sites"
@@ -102,36 +109,41 @@
 
 (defresource create-ring [ctx]
   authorization-required
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
   :allowed-methods [:post]
-  :processable? (fn [{:keys [request] :as ctx}]
+  :processable? (fn [{:keys [request identity] :as ctx}]
                   (let [{:keys [params]} request
                         ring (select-keys params [:name :description])
-                        ring (assoc ring :owner_id 1)]
+                        ring (assoc ring :owner_id (:id identity))]
                     {:ring ring}))
   :post! (fn [{:keys [db ring identity] :as ctx}]
-           (let [ring (query/create-ring<! (assoc ring :owner_id (:id identity)) {:connection db})]
+           (let [ring (query/create-ring<! ring {:connection db})]
              {:id (:id ring)}))
   :post-redirect? (fn [{:keys [id]}]
                     {:location (path-for routes :ring :id id)}))
 
 (defresource new-ring [ctx]
   authorization-required
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
   :handle-ok (fn [ctx]
-               (page "new web ring"
+               (page ctx "new web ring"
                  [:h2 "new ring"]
-                 (form-to [:post "/rings"]
-                   [:div {:class "form-group"}
-                    (form/label :name "name")
-                    (form/text-field {:placeholder "webring name"
-                                      :class "form-control"} :name)]
-                   [:div {:class "form-group"}
-                    (form/label :description "description")
-                    (form/text-field {:placeholder "description"
-                                      :class "form-control"} :description)]
+                 (form-to
+                   {:class "ring-form"}
+                   [:post "/rings"]
+                   (anti-forgery/anti-forgery-field)
+                   [:div {:class "ring-row"}
+                    (form/label {:class "ring-label"} :name "name")
+                    [:div {:class "ring-input-container"}
+                     (form/text-field {:placeholder "webring name"
+                                       :class "ring-input"} :name)]]
+                   [:div {:class "ring-row"}
+                    (form/label {:class "ring-label"} :description "description")
+                    [:div {:class "ring-input-container"}
+                     (form/text-field {:placeholder "description"
+                                       :class "ring-input"} :description)]]
                    (form/submit-button {:class "submit-button"} "submit")))))
 
 (defresource new-site [ctx]
@@ -139,7 +151,7 @@
 
 (defresource approve-site [ctx]
   :authorization-required
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :allowed-methods [:post]
   :available-media-types ["text/html"]
   :exists? (fn [{:keys [db request]}]
@@ -154,7 +166,7 @@
 
 (defresource deactivate-site [ctx]
   authorization-required
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :allowed-methods [:post]
   :available-media-types ["text/html"]
   :exists? (fn [{:keys [db request]}]
@@ -168,44 +180,54 @@
                     {:location (path-for routes :ring :id (:ring_id site))}))
 
 (defn login-page [ctx]
-  (page "login"
+  (page ctx "login"
     [:h2 "login"]
-    (form-to [:post "/login"]
-      [:div {:class "form-group row"}
-       (form/label {:class "col-sm-2 col-form-label"} :email "email")
-       [:div {:class "col-sm-10"}
+    (form-to
+      {:class "login-form"}
+      [:post "/login"]
+      (anti-forgery/anti-forgery-field)
+      [:div {:class "login-row"}
+       (form/label {:class "login-label"} :email "email")
+       [:div {:class "login-input-container"}
         (form/text-field {:placeholder "email"
-                          :class "form-control"} :email)]]
-      [:div {:class "form-group row"}
-       (form/label {:class "col-sm-2 col-form-label"} :password "password")
-       [:div {:class "col-sm-10"}
+                          :class "login-input"} :email)]]
+      [:div {:class "login-row"}
+       (form/label {:class "login-label"} :password "password")
+       [:div {:class "login-input-container"}
         (form/password-field {:placeholder "password"
-                              :class "form-control"} :password)]]
+                              :class "login-input"} :password)]]
       (form/submit-button {:class "submit-button"} "submit"))))
 
+
 (defresource login [ctx]
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :allowed-methods [:get]
   :available-media-types ["text/html"]
-  :handle-ok (fn [_] (login-page ctx)))
+  :handle-ok (fn [ctx] (login-page ctx)))
 
 (defn registration-page [ctx]
-  (page "register"
+  (page ctx "register"
     [:h2 "register"]
-    (form-to [:post "/register"]
-      [:div
-       (form/label :email "email")
-       (form/text-field {:placeholder "email"} :email)]
-      [:div
-       (form/label :password "password")
-       (form/password-field {:placeholder "password"} :password)]
-      [:div
-       (form/label :repeat-password "repeat password")
-       (form/password-field {:placeholder "password"} :repeat-password)]                   
-      (form/submit-button "submit"))))
+    (form-to
+      {:class "registration-form"}
+      [:post "/register"]
+      (anti-forgery/anti-forgery-field)
+      [:div {:class "registration-row"}
+       (form/label {:class "registration-label"} :email "email")
+       [:div {:class "registration-input-container"}
+        (form/text-field {:class "registration-input" :placeholder "email"} :email)]]
+      [:div {:class "registration-row"}
+       (form/label {:class "registration-label"} :password "password")
+       [:div {:class "registration-input-container"}
+        (form/password-field {:class "registration-input" :placeholder "password"} :password)]]
+      [:div {:class "registration-row"}
+       (form/label {:class "registration-label"} :repeat-password "repeat password")
+       [:div {:class "registration-input-container"}
+        (form/password-field {:class "registration-input" :placeholder "password"} :repeat-password)]]                   
+      (form/submit-button {:class "submit-button"} "submit"))))
 
 (defresource register [ctx]
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :allowed-methods [:post]
   :available-media-types ["text/html"]
   :exists? (fn [{:keys [db request]}]
@@ -225,19 +247,23 @@
              (when user (:id user))))
   :post-redirect? (fn [_]
                     {:location (path-for routes :rings)})
-  :handle-conflict (fn [_] (registration-page ctx)))
+  :handle-conflict (fn [ctx] (registration-page ctx)))
 
 (defresource registration [ctx]
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :allowed-methods [:get]
   :available-media-types ["text/html"]
-  :handle-ok (fn [{:keys [db]}]
+  :handle-ok (fn [{:keys [db] :as ctx}]
                (registration-page ctx)))
 
 (defresource index [ctx]
-  authorization-required
-  :initialize-context ctx
+  :initialize-context (initialize-context ctx)
   :allowed-methods [:get]
   :available-media-types ["text/html"]
+  :exists? (fn [ctx] (when-not (current-user ctx) true))
+  :existed? current-user
+  :moved-temporarily? (fn [{:keys [identity]}]
+                        (when identity
+                          {:location (path-for routes :rings)}))
   :handle-ok (fn [{:keys [db identity] :as ctx}]
-               "wan gwan"))
+               (page ctx "index" [:h2 "welcome"])))

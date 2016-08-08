@@ -1,0 +1,107 @@
+.navigation {
+  @extend .navbar;
+  @extend .navbar-fixed-top;  
+  
+  background-color: $brand-primary;
+}
+
+.navigation-list {
+  @extend .nav;
+  @extend .navbar-nav;
+  @include pull-right();    
+}
+
+.navigation-item {
+  @extend .nav-item;
+}
+
+.navigation-link {
+  @extend .nav-link;
+  
+  color: $brand-inverse;
+}
+
+.navigation-button {
+  @extend .navigation-link;
+  @extend .btn;
+  @extend .btn-info;
+}
+  
+.brand {
+  @extend .navbar-brand;
+  
+  color: $brand-inverse;
+}
+
+.login-form {
+
+}
+
+.login-row {
+  @include make-row();
+  @extend .form-group;
+}
+
+.login-input-container {
+  @extend .col-sm-5;
+}
+
+.login-input {
+  @extend .form-control;
+}
+
+.login-label {
+  @extend .col-sm-12;
+  @extend .col-form-label;
+}
+
+
+.registration-form {
+
+}
+
+.registration-row {
+  @include make-row();
+  @extend .form-group;
+}
+
+.registration-input-container {
+  @extend .col-sm-5;
+}
+
+.registration-input {
+  @extend .form-control;
+}
+
+.registration-label {
+  @extend .col-sm-12;
+  @extend .col-form-label;
+}
+
+
+.ring-form {
+
+}
+
+.ring-row {
+  @include make-row();
+  @extend .form-group;
+}
+
+.ring-input-container {
+  @extend .col-sm-5;
+}
+
+.ring-input {
+  @extend .form-control;
+}
+
+.ring-label {
+  @extend .col-sm-12;
+  @extend .col-form-label;
+}
+
+.submit-button {
+  @extend .btn;
+  @extend .btn-primary;  
+}
