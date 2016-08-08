@@ -59,7 +59,7 @@ gulp.task('rework', ['buster'], function () {
     .pipe(rework(reworkUrl(function(url) {
       var p    = path.parse(url)
       var hash = busters["resources/public/assets" + url]
-      console.log(p);
+
       if(p.extname && p.extname.indexOf('.') == 0 && hash) {
         console.log(p);
         var url = path.format({
@@ -73,6 +73,7 @@ gulp.task('rework', ['buster'], function () {
 
       return url;
     })))
+    .pipe(cleanCSS())
     .pipe(gulp.dest(dest.css_dir))
 });
 
@@ -107,7 +108,6 @@ gulp.task('sass', function () {
   return gulp.src(paths.sass)
     .pipe(sourcemaps.init())
     .pipe(sass({includePaths: paths.sass_libs}).on('error', sass.logError))
-    .pipe(cleanCSS())
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.css_dir))
 });
