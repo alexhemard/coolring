@@ -15,7 +15,10 @@
                  [hiccup "1.0.5"]
                  [hikari-cp "1.7.2"]
                  [liberator "0.14.1"]
+                 [log4j/log4j "1.2.17"]
                  [org.clojure/clojure "1.7.0"]
+                 [org.clojure/tools.logging "0.3.1"]
+                 [org.slf4j/slf4j-log4j12 "1.7.12"]
                  [org.clojure/java.jdbc "0.6.2-alpha2"]
                  [org.postgresql/postgresql "9.4.1209"]
                  [ragtime "0.6.1"]
@@ -36,7 +39,7 @@
                                               "gulp"
                                               "javac"
                                               "compile"]}}
-  
+
   :repl-options {:init-ns dev}
 
   :main coolring.core
