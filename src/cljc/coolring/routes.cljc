@@ -3,6 +3,7 @@
 
 (def routes
   ["/" [[""         :index]
+        ["settings" {:get :settings}]
         ["login"    {:get :login}]
         ["register"  {:get  :registration
                       :post :register}]

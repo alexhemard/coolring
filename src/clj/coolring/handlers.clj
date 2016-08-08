@@ -1,5 +1,6 @@
 (ns coolring.handlers
   (:require [liberator.core     :refer [resource defresource]]
+            [liberator.representation :as rep]
             [clojure.tools.logging :as log]
             [hiccup.page        :refer [html5 include-css include-js]]
             [hiccup.element     :refer [link-to image]]
@@ -146,8 +147,20 @@
                                        :class "ring-input"} :description)]]
                    (form/submit-button {:class "submit-button"} "submit")))))
 
+(defresource settings [ctx]
+  :initialize-context (initialize-context ctx)
+  :available-media-types ["text/html"]
+  :handle-ok (fn [ctx]
+               (page ctx "settings"
+                 [:h2 "settings"]
+                 [:p "todo..."])))
+
 (defresource new-site [ctx]
-  :initialize-context ctx)
+  :initialize-context (initialize-context ctx)
+  :available-media-types ["text/html"]
+  :handle-ok (fn [ctx]
+               (page ctx "new site"
+                 [:h2 "todo"])))
 
 (defresource approve-site [ctx]
   :authorization-required
@@ -243,10 +256,14 @@
            (let [{:keys [email password]} (:params request) 
                  user  (query/create-user<! {:email email
                                              :hashword (hash-bcrypt password)}
-                         {:connection db})]
-             (when user (:id user))))
-  :post-redirect? (fn [_]
+                         {:connection db})
+                 auth (make-auth {:identity (:id user) :email email})]
+             {:auth auth}))
+  :post-redirect? (fn [ctx]
                     {:location (path-for routes :rings)})
+  :handle-see-other (fn [{:keys [auth request]}]
+                      (rep/ring-response
+                        (friend/merge-authentication {:status 303} auth)))
   :handle-conflict (fn [ctx] (registration-page ctx)))
 
 (defresource registration [ctx]

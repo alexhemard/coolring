@@ -8,7 +8,7 @@
             [bidi.ring                   :refer [redirect make-handler resources-maybe]]
             [cemerick.friend             :as friend]
             [cemerick.friend.workflows   :refer [make-auth]]
-            [cemerick.friend.credentials :refer [bcrypt-verify]]            
+            [cemerick.friend.credentials :refer [bcrypt-verify]]
             [coolring.routes             :refer [routes]]
             [coolring.query              :as query]
             [coolring.handlers           :as h]))
@@ -48,7 +48,8 @@
   {:index           (h/index ctx)
    :login           (h/login ctx)
    :register        (h/register ctx)
-   :registration    (h/registration ctx)   
+   :registration    (h/registration ctx)
+   :settings        (h/settings ctx)
    :rings           (h/rings ctx)
    :ring            (h/ring  ctx)
    :create-ring     (h/create-ring ctx)
