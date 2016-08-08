@@ -8,6 +8,8 @@
 
   :uberjar-name "coolring.jar"
 
+  :min-lein-version "2.6.1"
+
   :dependencies [[bidi "2.0.9"]
                  [com.cemerick/friend "0.2.3"]
                  [com.stuartsierra/component "0.3.0"]
