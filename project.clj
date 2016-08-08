@@ -6,6 +6,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
+  :uberjar-name "coolring.jar"
+
   :dependencies [[bidi "2.0.9"]
                  [com.cemerick/friend "0.2.3"]
                  [com.stuartsierra/component "0.3.0"]
