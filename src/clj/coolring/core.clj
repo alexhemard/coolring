@@ -1,12 +1,13 @@
 (ns coolring.core
   (:require [com.stuartsierra.component :refer [start-system start]]
             [coolring.system            :refer [system]]
+            [coolring.util              :refer [parse-int]]
             [ragtime.repl                 :as ragtime]
             [ragtime.jdbc                 :as jdbc]
             [environ.core               :refer [env]])
   (:gen-class))
 
-(def config {:http {:port (env :port 8000)}})
+(def config {:http {:port (parse-int (env :port 8000))}})
 
 (defn load-config []
   (let [db (start (:db (system config)))
