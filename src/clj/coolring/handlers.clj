@@ -10,7 +10,7 @@
             [bidi.bidi          :refer [path-for] :as bidi]
             [ring.util.anti-forgery :as anti-forgery]
             [cemerick.friend             :as friend]
-            [cemerick.friend.workflows   :refer [make-auth]]            
+            [cemerick.friend.workflows   :refer [make-auth]]
             [cemerick.friend.credentials :refer [hash-bcrypt]]
             [coolring.routes    :refer [routes]]
             [coolring.query     :as query]
@@ -50,7 +50,7 @@
       [:li {:class "navigation-item"} [:a {:href "/settings" :class "navigation-link"} email]]
       [:li {:class "navigation-item"}
        [:a {:class "navigation-button" :href "/rings/new"} "new ring"]]]
-     [:ul {:class "navigation-list"}     
+     [:ul {:class "navigation-list"}
       [:li {:class "navigation-item"} [:a {:class "navigation-link" :href "/login"} "login"]]
       [:li {:class "navigation-item"} [:a {:class "navigation-link" :href "/register"} "register"]]])])
 
@@ -236,7 +236,7 @@
       [:div {:class "registration-row"}
        (form/label {:class "registration-label"} :repeat-password "repeat password")
        [:div {:class "registration-input-container"}
-        (form/password-field {:class "registration-input" :placeholder "password"} :repeat-password)]]                   
+        (form/password-field {:class "registration-input" :placeholder "password"} :repeat-password)]]
       (form/submit-button {:class "submit-button"} "submit"))))
 
 (defresource register [ctx]
@@ -250,10 +250,10 @@
                                                              :result-set-fn first})]
                (when user {:user user})))
   :post-to-existing? (fn [_] false)
-  :put-to-existing? (fn [_] true)  
-  :conflict? (fn [_] true)  
+  :put-to-existing? (fn [_] true)
+  :conflict? (fn [_] true)
   :post! (fn [{:keys [db request]}]
-           (let [{:keys [email password]} (:params request) 
+           (let [{:keys [email password]} (:params request)
                  user  (query/create-user<! {:email email
                                              :hashword (hash-bcrypt password)}
                          {:connection db})
@@ -286,6 +286,7 @@
                (page ctx "welcome 2 coolring.club"
                  [:h2 "welcome 2 the future"]
                  [:p "create your own webring!"]
+                 [:link {:rel "import" :href "cool.html"}]
                  [:p
-                  (image (img-asset "webring.gif") "webring")]
+                  (image {:class "homepage-image"} (img-asset "webring.gif") "webring")]
                  [:marquee [:p "\"wow. very cool. i am impressed!\" - internet magazine"]])))

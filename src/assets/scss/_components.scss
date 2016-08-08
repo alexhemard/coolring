@@ -1,14 +1,18 @@
+.homepage-image {
+  @include img-fluid();
+}
+
 .navigation {
   @extend .navbar;
-  @extend .navbar-fixed-top;  
-  
+  @extend .navbar-fixed-top;
+
   background-color: $brand-primary;
 }
 
 .navigation-list {
   @extend .nav;
   @extend .navbar-nav;
-  @include pull-right();    
+  @include pull-right();
 }
 
 .navigation-item {
@@ -17,7 +21,7 @@
 
 .navigation-link {
   @extend .nav-link;
-  
+
   color: $brand-inverse;
 }
 
@@ -26,10 +30,10 @@
   @extend .btn;
   @extend .btn-info;
 }
-  
+
 .brand {
   @extend .navbar-brand;
-  
+
   color: $brand-inverse;
 }
 
@@ -103,5 +107,5 @@
 
 .submit-button {
   @extend .btn;
-  @extend .btn-primary;  
+  @extend .btn-primary;
 }
