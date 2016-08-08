@@ -2,7 +2,7 @@
   (:require [liberator.core     :refer [resource defresource]]
             [clojure.tools.logging :as log]
             [hiccup.page        :refer [html5 include-css include-js]]
-            [hiccup.element     :refer [link-to]]
+            [hiccup.element     :refer [link-to image]]
             [hiccup.form        :refer [form-to] :as form]
             [ring.util.response :refer [content-type response]]
             [cheshire.core      :as json]
@@ -13,7 +13,7 @@
             [cemerick.friend.credentials :refer [hash-bcrypt]]
             [coolring.routes    :refer [routes]]
             [coolring.query     :as query]
-            [coolring.assets    :refer [js-asset css-asset]]))
+            [coolring.assets    :refer [js-asset css-asset img-asset]]))
 
 (defn current-user [{:keys [db request] :as ctx}]
   (let [{:keys [identity]} (-> request
@@ -260,10 +260,15 @@
   :initialize-context (initialize-context ctx)
   :allowed-methods [:get]
   :available-media-types ["text/html"]
-  :exists? (fn [ctx] (when-not (current-user ctx) true))
-  :existed? current-user
+  :exists? (fn [ctx] (not (contains? ctx :identity)))
+  :existed? (fn [ctx] (contains? ctx :identity))
   :moved-temporarily? (fn [{:keys [identity]}]
                         (when identity
                           {:location (path-for routes :rings)}))
   :handle-ok (fn [{:keys [db identity] :as ctx}]
-               (page ctx "index" [:h2 "welcome"])))
+               (page ctx "index"
+                 [:h2 "welcome 2 the future"]
+                 [:p "create your own webring!"]
+                 [:p
+                  (image (img-asset "webring.gif") "webring")]
+                 [:marquee [:p "\"wow. very cool. i am impressed!\" - internet magazine"]])))

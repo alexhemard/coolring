@@ -17,15 +17,17 @@ var paths = {
   css:        'resources/public/css/app.css',
   css_dir:    'resources/public/css',
   js:         'resources/public/js/**/*.js',
-  fonts:      'resources/public/fonts/*'
+  fonts:      'resources/public/fonts/*',
+  images:     'resources/public/images/*'  
 }
 
 var dest = {
-  css:       'resources/public/assets/css/app.css',
-  css_dir:   'resources/public/assets/css',
-  js_dir:    'resources/public/assets/js',
-  fonts_dir: 'resources/public/assets/fonts',
-  asset_dir: 'resources/public/assets'
+  css:        'resources/public/assets/css/app.css',
+  css_dir:    'resources/public/assets/css',
+  js_dir:     'resources/public/assets/js',
+  fonts_dir:  'resources/public/assets/fonts',
+  images_dir: 'resources/public/assets/images',  
+  asset_dir:  'resources/public/assets'
 }
 
 gulp.task('build', ['clean'], function() {
@@ -74,8 +76,9 @@ gulp.task('rework', ['buster'], function () {
     .pipe(gulp.dest(dest.css_dir))
 });
 
-gulp.task('buster', ['css', 'js', 'fonts'], function () {
-  return gulp.src([dest.css, dest.js_dir + "/**/*.js", dest.fonts_dir + "/*"])
+gulp.task('buster', ['css', 'js', 'fonts', 'images'], function () {
+  return gulp.src([dest.css, dest.js_dir + "/**/*.js", dest.fonts_dir + "/*",
+                   dest.images_dir + "/*"])
     .pipe(buster({fileName: 'manifest.json'}))
     .pipe(gulp.dest(dest.asset_dir))
 });
@@ -93,6 +96,11 @@ gulp.task('js', function () {
 gulp.task('fonts', function () {
   return gulp.src(paths.fonts)
     .pipe(gulp.dest(dest.fonts_dir))
+});
+
+gulp.task('images', function () {
+  return gulp.src(paths.images)
+    .pipe(gulp.dest(dest.images_dir))
 });
 
 gulp.task('sass', function () {

@@ -38,4 +38,8 @@
 
 (defn js-asset [path]
   (let [path (str "/js/" path)]
-       (or (asset path) path)))
+    (or (asset path) path)))
+
+(defn img-asset [path]
+  (let [path (str "/images/" path)]
+    (or (asset path) path)))
