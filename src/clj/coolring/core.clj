@@ -2,10 +2,11 @@
   (:require [com.stuartsierra.component :refer [start-system start]]
             [coolring.system            :refer [system]]
             [ragtime.repl                 :as ragtime]
-            [ragtime.jdbc                 :as jdbc])
+            [ragtime.jdbc                 :as jdbc]
+            [environ.core               :refer [env]])
   (:gen-class))
 
-(def config {:http {:port 8000}})
+(def config {:http {:port (env :port 8000)}})
 
 (defn load-config []
   (let [db (start (:db (system config)))
