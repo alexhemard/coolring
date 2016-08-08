@@ -1,7 +1,12 @@
-@import "normalize";
+@import "bootstrap";
 
 body {
-  font-family: courier;
+  font-family: $font-family-serif;
   background-color: lightblue;
-  margin: 20px;
 }
+
+.submit-button {
+  @extend .btn;
+  @extend .btn-primary;  
+}
+

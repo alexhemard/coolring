@@ -45,12 +45,15 @@
 (defn page [title & body]
   (html5
     [:head
+     [:meta {:charset "utf-8"}]
+     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+     
      [:title (str "coolring.club | " title)]
      (include-js  (js-asset  "app.js"))
      (include-css (css-asset "app.css"))
      [:body
       [:div {:class "container"}
-       [:h1 "coolring.club"]
+       [:nav [:h1 "coolring.club"]]
        body]]]))
 
 (defmulti link (fn [type entity] type))
@@ -121,13 +124,15 @@
                (page "new web ring"
                  [:h2 "new ring"]
                  (form-to [:post "/rings"]
-                   [:div
+                   [:div {:class "form-group"}
                     (form/label :name "name")
-                    (form/text-field {:placeholder "webring name"} :name)]
-                   [:div
+                    (form/text-field {:placeholder "webring name"
+                                      :class "form-control"} :name)]
+                   [:div {:class "form-group"}
                     (form/label :description "description")
-                    (form/text-field {:placeholder "description"} :description)]
-                   (form/submit-button "submit")))))
+                    (form/text-field {:placeholder "description"
+                                      :class "form-control"} :description)]
+                   (form/submit-button {:class "submit-button"} "submit")))))
 
 (defresource new-site [ctx]
   :initialize-context ctx)
@@ -166,13 +171,17 @@
   (page "login"
     [:h2 "login"]
     (form-to [:post "/login"]
-      [:div
-       (form/label :email "email")
-       (form/text-field {:placeholder "email"} :email)]
-      [:div
-       (form/label :password "password")
-       (form/password-field {:placeholder "password"} :password)]
-      (form/submit-button "submit"))))
+      [:div {:class "form-group row"}
+       (form/label {:class "col-sm-2 col-form-label"} :email "email")
+       [:div {:class "col-sm-10"}
+        (form/text-field {:placeholder "email"
+                          :class "form-control"} :email)]]
+      [:div {:class "form-group row"}
+       (form/label {:class "col-sm-2 col-form-label"} :password "password")
+       [:div {:class "col-sm-10"}
+        (form/password-field {:placeholder "password"
+                              :class "form-control"} :password)]]
+      (form/submit-button {:class "submit-button"} "submit"))))
 
 (defresource login [ctx]
   :initialize-context ctx

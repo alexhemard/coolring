@@ -39,4 +39,7 @@
   
   :repl-options {:init-ns dev}
 
-  :plugins [[lein-environ "1.0.1"]])
+  :main coolring.core
+
+  :plugins [[lein-environ "1.0.1"]
+            [lein-shell "0.5.0"]])

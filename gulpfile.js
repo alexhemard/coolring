@@ -12,7 +12,7 @@ var del        = require('del');
 var vinylPaths = require('vinyl-paths');
 
 var paths = {
-  sass_libs: ['node_modules/normalize.css'],
+  sass_libs: ['node_modules'],
   sass:       'src/assets/scss/app.scss',
   css:        'resources/public/css/app.css',
   css_dir:    'resources/public/css',
