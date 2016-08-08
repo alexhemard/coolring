@@ -5,16 +5,19 @@
             [environ.core   :refer [env]])
    (:import [java.net URI URLEncoder]))
 
+(def scheme-map {"postgres" "postgresql"})
+
 (defn- parse-properties-uri [^URI uri]
   (let [host   (.getHost uri)
         port   (if (pos? (.getPort uri)) (.getPort uri))
         path   (.getPath uri)
-        scheme (.getScheme uri)]
+        scheme (.getScheme uri)
+        scheme (get scheme-map scheme scheme)]
     (merge
       {:server-name   host
        :database-name (string/replace path #"^/" "")
        :port-number   port
-       :adapter   scheme}
+       :adapter       scheme}
      (if-let [user-info (.getUserInfo uri)]
        {:username (first (string/split user-info #":"))
         :password (second (string/split user-info #":"))}))))
@@ -29,7 +32,7 @@
    :pool-name          "coolring-pool"
    :maximum-pool-size  6})
 
-(def db-spec
+(defn db-spec []
   (-> (URI. (env :DATABASE_URL
               "postgresql://postgres:postgres@localhost:5432/coolring"))
     (parse-properties-uri)
@@ -38,7 +41,7 @@
 (defrecord Database [config datasource]
   component/Lifecycle
   (start [component]
-    (let [ds-config (merge config db-spec)
+    (let [ds-config (merge config (db-spec))
           ds        (make-datasource ds-config)]
       (assoc component :datasource ds)))
 
