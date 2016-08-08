@@ -37,7 +37,7 @@ gulp.task('build', ['clean'], function() {
 gulp.task('assets', ['rework'], function () {
   var busters = require("./resources/public/assets/manifest.json");
 
-  gulp.src([dest.js_dir + "/**/*.js", dest.css, dest.fonts_dir + "/*"], { base: process.cwd() })
+  gulp.src([dest.js_dir + "/**/*.js", dest.css, dest.fonts_dir + "/*", dest.images_dir + "/**/*"], { base: process.cwd() })
     .pipe(vinylPaths(del))
     .pipe(rename(function (p) {
       var file = p.dirname + "/" + p.basename + p.extname

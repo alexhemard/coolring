@@ -22,24 +22,24 @@
       [base nil])))
 
 (defn asset [path]
-  (when-let [file (first (regex-file-seq
-                     (re-pattern (str ".*" path "$"))
-                     (io/file "resources/public/assets")))]
-    (let [hash       (manifest (.getPath file))
-          parent     (.getParent file)
-          [name ext] (split-ext file)
-          file (io/file (str parent "/" name "-" hash ext))]
-      (when (.exists file)
-        (clojure.string/replace (.getPath file) #"resources/public" "")))))
+  (let [asset-path (str "resources/public/assets" path)
+        file       (io/file asset-path)
+        hash       (manifest asset-path)
+        parent     (.getParent file)
+        [name ext] (split-ext file)
+        file (io/file (str parent "/" name "-" hash ext))]
+  (if (.exists file)
+    (clojure.string/replace (.getPath file) #"resources/public" "")
+    path)))
 
 (defn css-asset [path]
   (let [path (str "/css/" path)]
-       (or (asset path) path)))
+       (asset path)))
 
 (defn js-asset [path]
   (let [path (str "/js/" path)]
-    (or (asset path) path)))
+    (asset path)))
 
 (defn img-asset [path]
   (let [path (str "/images/" path)]
-    (or (asset path) path)))
+    (asset path)))
