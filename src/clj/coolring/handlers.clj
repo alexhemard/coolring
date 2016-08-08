@@ -283,7 +283,7 @@
                         (when identity
                           {:location (path-for routes :rings)}))
   :handle-ok (fn [{:keys [db identity] :as ctx}]
-               (page ctx "index"
+               (page ctx "welcome 2 coolring.club"
                  [:h2 "welcome 2 the future"]
                  [:p "create your own webring!"]
                  [:p
