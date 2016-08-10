@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: coolring
+  labels:
+    name: coolring
+spec:
+  replicas: 1
+  selector:
+    name: coolring
+  template:
+    metadata:
+      labels:
+        name: coolring
+    spec:
+      containers:
+        - name: coolring
+          image: coolring:dev
+          env:
+            - name: GET_HOSTS_FROM
+              value: dns            
+            - name: DATABASE_URL
+              value: postgres://postgres:postgres@database:5432/coolring
+          ports:
+            - containerPort: 8000
+          imagePullPolicy: IfNotPresent

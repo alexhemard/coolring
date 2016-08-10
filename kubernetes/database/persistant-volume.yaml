@@ -1,0 +1,17 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pg-data-disk
+  labels:
+    name: pg-data-disk
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /data/pg-data/
+  # gcePersistentDisk:
+  #   pdName: pg-data-disk
+  #   fsType: ext4
