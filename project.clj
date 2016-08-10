@@ -22,6 +22,7 @@
                  [log4j/log4j "1.2.17"]
                  [org.clojure/clojure "1.7.0"]
                  [org.clojure/tools.logging "0.3.1"]
+                 [org.clojure/tools.cli "0.3.5"]
                  [org.slf4j/slf4j-log4j12 "1.7.12"]
                  [org.clojure/java.jdbc "0.6.2-alpha2"]
                  [org.postgresql/postgresql "9.4.1209"]
@@ -29,6 +30,7 @@
                  [ring-jetty-component "0.3.1"]
                  [ring/ring "1.5.0"]
                  [ring/ring-defaults "0.2.1"]
+                 [jkkramer/verily "0.6.0"]
                  [yesql "0.5.3"]]
 
   :source-paths ["src/clj" "src/cljc" "src/sql"]
