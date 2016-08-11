@@ -3,9 +3,12 @@ $brand-primary: #4fd999 ;
 $border-radius: 0;
 $btn-box-shadow: 5px 5px;
 $box-shadow: 5px 5px;
-$btn-primary-color: darken($brand-primary, 25%);
+$btn-primary-color: darken($brand-primary, 40%);
 $btn-primary-bg: $brand-primary;
 $btn-info-color: #000;
 $input-btn-border-width: 1px;
 $input-box-shadow: none;
 $input-box-shadow-focus: none;
+
+$list-group-bg: #eaeaea;
+$list-group-border-width: 0;

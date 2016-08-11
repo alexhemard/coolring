@@ -112,11 +112,6 @@
       [:div {:class "container"}
        body]]]))
 
-(defmulti link (fn [type entity] type))
-
-(defmethod link :default [type entity]
-  (link-to {} (str "/" (name type) "/" (:id entity)) (:name entity)))
-
 (defresource rings [ctx]
   authorization-required
   :initialize-context (initialize-context ctx)
@@ -126,10 +121,10 @@
   :handle-ok (fn [{:keys [rings] :as ctx}]
                (page ctx "home"
                  [:h2 "my web rings"]
-                 [:ul
-                  (for [ring rings]
-                    [:li [:div
-                          [:div (link :rings ring)]]])])))
+                 [:div {:class "ring-list"}
+                  (for [{:keys [id name]} rings]
+                    (link-to {:class "ring-item" :data-ring-id id} (path-for routes :ring :id id)
+                      [:span name] [:div {:class "ring-action"} "delete"]))])))
 
 (defresource ring [ctx]
   authorization-required
