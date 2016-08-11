@@ -2,6 +2,7 @@
   (:require [liberator.core     :refer [resource defresource]]
             [liberator.representation :as rep]
             [clojure.tools.logging :as log]
+            [clojure.string     :refer [join]]
             [hiccup.page        :refer [html5 include-css include-js]]
             [hiccup.element     :refer [link-to image]]
             [hiccup.form        :refer [form-to] :as form]
@@ -9,12 +10,56 @@
             [cheshire.core      :as json]
             [bidi.bidi          :refer [path-for] :as bidi]
             [ring.util.anti-forgery :as anti-forgery]
-            [cemerick.friend             :as friend]
+            [jkkramer.verily :refer [validate]]
+            [cemerick.friend    :as friend]
             [cemerick.friend.workflows   :refer [make-auth]]
-            [cemerick.friend.credentials :refer [hash-bcrypt]]
+            [cemerick.friend.credentials :refer [hash-bcrypt]]            
             [coolring.routes    :refer [routes]]
             [coolring.query     :as query]
             [coolring.assets    :refer [js-asset css-asset img-asset]]))
+
+(def validate-registration
+  [[:required [:email :password :confirmation]]
+   [:email [:email]]
+   [:equal [:password :confirmation]]])
+
+(def validate-login
+  [[:required [:email :password]]])
+
+(def validate-ring
+  [[:required [:name]]])
+
+(def validate-site
+  [[:required [:url]]
+   [:url [:url]]])
+
+(defn show-errors [ctx]
+  (if-let [errors (:errors ctx)]
+    [:div {:class "alert"}
+     [:ul
+      (for [{:keys [keys msg]} errors
+            key keys]
+        [:li [:strong (name key)] (str " " msg)])]]))
+
+(defn validation-required
+  ([validator]
+   (validation-required
+     validator
+     (fn [{:keys [errors]}]
+       (join "<br/>"
+         (flatten
+           (for [error errors]
+             (for [key (:keys error)]
+               (str (name key) " " (:msg error)))))))))
+   ([validator error-fn]
+    {:processable? (fn [ctx]
+                     (let [params (get-in ctx [:request :params])
+                           errors (validate params validator)]
+                       (if (empty? errors)
+                         true
+                         [false {:errors errors}])))
+     :handle-unprocessable-entity (fn [ctx]
+                                    (error-fn ctx))}))
 
 (defn current-user [{:keys [db request] :as ctx}]
   (let [{:keys [identity]} (-> request
@@ -108,18 +153,37 @@
                       (link-to {:target "_blank"} (str (:url site)) (:name site))])]]
                  (link-to "/rings" "back"))))
 
+(defn new-ring-page [ctx]
+  (page ctx "new web ring"
+    [:h2 "new ring"]
+    (show-errors ctx)
+    (form-to
+      {:class "ring-form"}
+      [:post "/rings"]
+      (anti-forgery/anti-forgery-field)
+      [:div {:class "ring-row"}
+       (form/label {:class "ring-label"} :name "name")
+       [:div {:class "ring-input-container"}
+        (form/text-field {:placeholder "webring name"
+                          :class "ring-input"} :name)]]
+      [:div {:class "ring-row"}
+       (form/label {:class "ring-label"} :description "description")
+       [:div {:class "ring-input-container"}
+        (form/text-field {:placeholder "description"
+                          :class "ring-input"} :description)]]
+      (form/submit-button {:class "submit-button"} "submit"))))
+
 (defresource create-ring [ctx]
-  authorization-required
+  (merge
+    authorization-required
+    (validation-required validate-ring new-ring-page))
   :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
   :allowed-methods [:post]
-  :processable? (fn [{:keys [request identity] :as ctx}]
-                  (let [{:keys [params]} request
-                        ring (select-keys params [:name :description])
-                        ring (assoc ring :owner_id (:id identity))]
-                    {:ring ring}))
-  :post! (fn [{:keys [db ring identity] :as ctx}]
-           (let [ring (query/create-ring<! ring {:connection db})]
+  :post! (fn [{:keys [db identity request] :as ctx}]
+           (let [params (get request :params)
+                 ring (assoc params :owner_id (:id identity))
+                 ring (query/create-ring<! ring {:connection db})]
              {:id (:id ring)}))
   :post-redirect? (fn [{:keys [id]}]
                     {:location (path-for routes :ring :id id)}))
@@ -128,24 +192,7 @@
   authorization-required
   :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
-  :handle-ok (fn [ctx]
-               (page ctx "new web ring"
-                 [:h2 "new ring"]
-                 (form-to
-                   {:class "ring-form"}
-                   [:post "/rings"]
-                   (anti-forgery/anti-forgery-field)
-                   [:div {:class "ring-row"}
-                    (form/label {:class "ring-label"} :name "name")
-                    [:div {:class "ring-input-container"}
-                     (form/text-field {:placeholder "webring name"
-                                       :class "ring-input"} :name)]]
-                   [:div {:class "ring-row"}
-                    (form/label {:class "ring-label"} :description "description")
-                    [:div {:class "ring-input-container"}
-                     (form/text-field {:placeholder "description"
-                                       :class "ring-input"} :description)]]
-                   (form/submit-button {:class "submit-button"} "submit")))))
+  :handle-ok new-ring-page)
 
 (defresource settings [ctx]
   :initialize-context (initialize-context ctx)
@@ -195,6 +242,7 @@
 (defn login-page [ctx]
   (page ctx "login"
     [:h2 "login"]
+    (show-errors ctx)
     (form-to
       {:class "login-form"}
       [:post "/login"]
@@ -221,6 +269,7 @@
 (defn registration-page [ctx]
   (page ctx "register"
     [:h2 "register"]
+    (show-errors ctx)
     (form-to
       {:class "registration-form"}
       [:post "/register"]
@@ -234,12 +283,13 @@
        [:div {:class "registration-input-container"}
         (form/password-field {:class "registration-input" :placeholder "password"} :password)]]
       [:div {:class "registration-row"}
-       (form/label {:class "registration-label"} :repeat-password "repeat password")
+       (form/label {:class "registration-label"} :repeat-password "confirm password")
        [:div {:class "registration-input-container"}
-        (form/password-field {:class "registration-input" :placeholder "password"} :repeat-password)]]
+        (form/password-field {:class "registration-input" :placeholder "confirm password"} :confirmation)]]
       (form/submit-button {:class "submit-button"} "submit"))))
 
 (defresource register [ctx]
+  (validation-required validate-registration registration-page)
   :initialize-context (initialize-context ctx)
   :allowed-methods [:post]
   :available-media-types ["text/html"]
