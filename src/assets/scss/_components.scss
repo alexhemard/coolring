@@ -1,23 +1,22 @@
-.btn {
-  @include box-shadow(5px 5px $btn-primary-color);
+%button {
+  @extend .btn;
+  
+  @include box-shadow(5px 5px lighten($btn-primary-color, 10%));
   
   position: relative;
   
   &:active {
-    @include box-shadow(none);
+    @include box-shadow(none !important);
     
     top: 5px;
     left: 5px;
   }
-
-  &:focus {
-    @include box-shadow(5px 5px lighten($btn-primary-color, 10%));
-  }
 }
 
- %button {
-  @extend .btn;
-  @extend .btn-primary;
+.container {
+  background-color: darken($gray-lightest, 7%);
+  padding: 2rem;
+  @include box-shadow(5px 5px darken($body-bg, 8%));
 }
 
 .alert {
@@ -42,7 +41,7 @@
   @extend .navbar-fixed-top;
 
   background-color: $brand-primary;
-  border-bottom: 5px solid #e5e5e5;
+  border-bottom: 5px solid #62bf94;
 }
 
 .navigation-list {
@@ -63,19 +62,24 @@
 
 .navigation-button {
   @extend .navigation-link;
-  @extend .btn;
+  @extend %button;
   @extend .btn-info;
+  @include box-shadow(5px 5px darken($brand-info, 35%));
 
-  @include box-shadow(5px 5px $btn-primary-color);
+  color: white !important;
+  
+  &:hover, &:active {
+    color: white !important;
+  }
 }
 
 @keyframes rainbow {
-  0% {text-shadow: 1px 1px #ff0000;}
-  20% {text-shadow: 1px 1px #ff8000;}
-  40% {text-shadow: 1px 1px #ffff00;}
-  60% {text-shadow: 1px 1px #80ff00;}
-  80% {text-shadow: 1px 1px #00ff00;}
-  100% {text-shadow: 1px 1px  #8000ff;}
+  0% {text-shadow: 1px 1px red;}
+  25% {text-shadow: 1px 1px blue;}
+  50% {text-shadow: 1px 1px chocolate;}
+  75% {text-shadow: 1px 1px green;}
+  100% {text-shadow: 1px 1px purple;}
+  
 }
 
 .brand {
@@ -84,11 +88,11 @@
   animation: rainbow 1s infinite;
   animation-timing-function: step-end;
   
-  color: black;
+  color: white;
   font-weight: bold;
 
   &:hover {
-    color: #fff;
+    color: aqua;
   }
 }
 
@@ -165,10 +169,20 @@
 }
 
 .ring-item {
+  $ring-item-bg: #dadae2;
   @extend .list-group-item;
 
   min-height: 3em;
-  margin: 5px 0;
+  margin: 10px 0;
+  color: black;
+
+  background-color: $ring-item-bg;
+  @include box-shadow(1px 1px #bdbdbd);
+
+  &:hover {
+    color: black;
+    background-color: darken($ring-item-bg, 2%);
+  }
 }
 
 .ring-action {
@@ -179,6 +193,7 @@
   }
 }
 .submit-button {
+  @extend .btn-primary;
   @extend %button;
 }
 
