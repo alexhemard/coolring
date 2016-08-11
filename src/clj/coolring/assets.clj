@@ -23,13 +23,14 @@
 
 (defn asset [path]
   (let [asset-path (str "resources/public/assets" path)
-        file       (io/file asset-path)
         hash       (manifest asset-path)
+        file       (io/file (str "public/assets" path))
         parent     (.getParent file)
         [name ext] (split-ext file)
-        file (io/file (str parent "/" name "-" hash ext))]
-  (if (.exists file)
-    (clojure.string/replace (.getPath file) #"resources/public" "")
+        bust-path  (str parent "/" name "-" hash ext)
+        resource (io/resource bust-path)]
+  (if resource
+    (clojure.string/replace (.getPath (io/file bust-path)) #"(.*?public)(?=/assets)" "")
     path)))
 
 (defn css-asset [path]
