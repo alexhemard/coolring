@@ -13,10 +13,13 @@
   }
 }
 
-.container {
-  background-color: darken($gray-lightest, 7%);
-  padding: 2rem;
+.main {
+  @extend .container;
   @include box-shadow(5px 5px darken($body-bg, 8%));
+
+  padding: 2rem;
+  
+  background-color: darken($gray-lightest, 7%);
 }
 
 .alert {
@@ -41,7 +44,7 @@
   @extend .navbar-fixed-top;
 
   background-color: $brand-primary;
-  border-bottom: 5px solid #62bf94;
+  border-bottom: 2px solid #62bf94;
 }
 
 .navigation-list {
@@ -91,7 +94,7 @@
   color: white;
   font-weight: bold;
 
-  &:hover {
+  &:hover, &:focus {
     color: aqua;
   }
 }
