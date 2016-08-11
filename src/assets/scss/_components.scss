@@ -9,6 +9,10 @@
     top: 5px;
     left: 5px;
   }
+
+  &:focus {
+    @include box-shadow(5px 5px lighten($btn-primary-color, 10%));
+  }
 }
 
  %button {
@@ -65,10 +69,27 @@
   @include box-shadow(5px 5px $btn-primary-color);
 }
 
+@keyframes rainbow {
+  0% {text-shadow: 1px 1px #ff0000;}
+  20% {text-shadow: 1px 1px #ff8000;}
+  40% {text-shadow: 1px 1px #ffff00;}
+  60% {text-shadow: 1px 1px #80ff00;}
+  80% {text-shadow: 1px 1px #00ff00;}
+  100% {text-shadow: 1px 1px  #8000ff;}
+}
+
 .brand {
   @extend .navbar-brand;
 
-  color: $brand-inverse;
+  animation: rainbow 1s infinite;
+  animation-timing-function: step-end;
+  
+  color: black;
+  font-weight: bold;
+
+  &:hover {
+    color: #fff;
+  }
 }
 
 .login-form {
