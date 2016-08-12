@@ -1,7 +1,21 @@
 page = require('page');
 
 const explore = function(ctx) {
-  console.log("exploring");
+  console.log("loading");
+  const next   = document.getElementById('next');
+  const prev   = document.getElementById('previous');    
+  const iframe = document.getElementById('ring-iframe');
+
+  const onClick = function(e) {
+    e.preventDefault();
+
+    console.log("sup");
+    const target = e.target;
+    iframe.src = target.href;
+  }
+
+  prev.onclick = onClick;
+  next.onclick = onClick;
 }
 
 const loadRing = function(ctx, next) {

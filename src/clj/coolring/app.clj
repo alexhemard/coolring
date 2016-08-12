@@ -56,8 +56,9 @@
    :new-ring        (h/new-ring    ctx)
    :approve-site    (h/approve-site ctx)
    :deactivate-site (h/deactivate-site ctx)
-   :create-site     (h/create-site ctx)         
-   :submit-site     (h/new-site ctx)      
+   :create-site     (h/create-site ctx)
+   :submit-site     (h/new-site ctx)
+   :explore         (h/explore ctx)
    :not-found   (resources-maybe {:prefix "resources/public"})})
 
 (defn app [ctx]

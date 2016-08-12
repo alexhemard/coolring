@@ -99,7 +99,7 @@
       [:li {:class "navigation-item"} [:a {:class "navigation-link" :href "/login"} "login"]]
       [:li {:class "navigation-item"} [:a {:class "navigation-link" :href "/register"} "register"]]])])
 
-(defn page [ctx title & body]
+(defn layout [ctx title & body]
   (html5
     [:head
      [:meta {:charset "utf-8"}]
@@ -108,7 +108,13 @@
      (include-js  (js-asset  "app.js"))
      (include-css (css-asset "app.css"))
      [:body
-      (nav ctx)
+      body]]))
+
+(defn default-page [ctx title & body]
+  (layout ctx title
+    [:div {:class "app"}
+     (nav ctx)
+     [:div {:class "main"}
       body]]))
 
 (defresource rings [ctx]
@@ -118,13 +124,12 @@
   :exists? (fn [{:keys [db identity]}]
              {:rings (query/rings-by-owner {:owner_id (:id identity)} {:connection db})})
   :handle-ok (fn [{:keys [rings] :as ctx}]
-               (page ctx "home"
-                 [:div {:class "main"}
-                  [:h2 "my web rings"]
-                  [:div {:class "ring-list"}
-                   (for [{:keys [id name]} rings]
-                     (link-to {:class "ring-item" :data-ring-id id} (path-for routes :ring :id id)
-                       [:span name] [:div {:class "ring-action"} "delete"]))]])))
+               (default-page ctx "home"
+                 [:h2 "my web rings"]
+                 [:div {:class "ring-list"}
+                  (for [{:keys [id name]} rings]
+                    (link-to {:class "ring-item" :data-ring-id id} (path-for routes :ring :id id)
+                      [:span name] [:div {:class "ring-action"} "delete"]))])))
 
 (defresource ring [ctx]
   :initialize-context (initialize-context ctx)
@@ -137,35 +142,33 @@
                {:ring ring
                 :sites sites}))
   :handle-ok (fn [{:keys [ring sites] :as ctx}]
-               (page ctx (str (:name ring))
-                 [:div {:class "main"}
-                  [:h2 (:name ring)]
-                  [:p (:description ring)]
-                  [:h2 "sites"]
-                  [:div {:class "site-list"}
-                   (for [site sites]
-                     (link-to {:class "site-item" :target "_blank"} (str (:url site)) (:name site)))]])))
+               (default-page ctx (str (:name ring))
+                 [:h2 (:name ring)]
+                 [:p (:description ring)]
+                 [:h2 "sites"]
+                 [:div {:class "site-list"}
+                  (for [site sites]
+                    (link-to {:class "site-item" :target "_blank"} (str (:url site)) (:name site)))])))
 
 (defn new-ring-page [ctx]
-  (page ctx "new web ring"
-    [:div {:class "main"}
-     [:h2 "new ring"]
-     (show-errors ctx)
-     (form-to
-       {:class "ring-form"}
-       [:post "/rings"]
-       (anti-forgery/anti-forgery-field)
-       [:div {:class "ring-row"}
-        (form/label {:class "ring-label"} :name "name")
-        [:div {:class "ring-input-container"}
-         (form/text-field {:placeholder "webring name"
-                           :class "ring-input"} :name)]]
-       [:div {:class "ring-row"}
-        (form/label {:class "ring-label"} :description "description")
-        [:div {:class "ring-input-container"}
-         (form/text-field {:placeholder "description"
-                           :class "ring-input"} :description)]]
-       (form/submit-button {:class "submit-button"} "submit"))]))
+  (default-page ctx "new web ring"
+    [:h2 "new ring"]
+    (show-errors ctx)
+    (form-to
+      {:class "ring-form"}
+      [:post "/rings"]
+      (anti-forgery/anti-forgery-field)
+      [:div {:class "ring-row"}
+       (form/label {:class "ring-label"} :name "name")
+       [:div {:class "ring-input-container"}
+        (form/text-field {:placeholder "webring name"
+                          :class "ring-input"} :name)]]
+      [:div {:class "ring-row"}
+       (form/label {:class "ring-label"} :description "description")
+       [:div {:class "ring-input-container"}
+        (form/text-field {:placeholder "description"
+                          :class "ring-input"} :description)]]
+      (form/submit-button {:class "submit-button"} "submit"))))
 
 (defresource create-ring [ctx]
   (merge
@@ -192,10 +195,9 @@
   :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
   :handle-ok (fn [ctx]
-               (page ctx "settings"
-                 [:div {:class "main"}
-                  [:h2 "settings"]
-                  [:p "todo..."]])))
+               (default-page ctx "settings"
+                 [:h2 "settings"]
+                 [:p "todo..."])))
 
 (defresource approve-site [ctx]
   :authorization-required
@@ -228,25 +230,24 @@
                     {:location (path-for routes :ring :id (:ring_id site))}))
 
 (defn login-page [ctx]
-  (page ctx "login"
-    [:div {:class "main"}
-     [:h2 "login"]
-     (show-errors ctx)
-     (form-to
-       {:class "login-form"}
-       [:post "/login"]
-       (anti-forgery/anti-forgery-field)
-       [:div {:class "login-row"}
-        (form/label {:class "login-label"} :email "email")
-        [:div {:class "login-input-container"}
-         (form/text-field {:placeholder "email"
-                           :class "login-input"} :email)]]
-       [:div {:class "login-row"}
-        (form/label {:class "login-label"} :password "password")
-        [:div {:class "login-input-container"}
-         (form/password-field {:placeholder "password"
-                               :class "login-input"} :password)]]
-       (form/submit-button {:class "submit-button"} "submit"))]))
+  (default-page ctx "login"
+    [:h2 "login"]
+    (show-errors ctx)
+    (form-to
+      {:class "login-form"}
+      [:post "/login"]
+      (anti-forgery/anti-forgery-field)
+      [:div {:class "login-row"}
+       (form/label {:class "login-label"} :email "email")
+       [:div {:class "login-input-container"}
+        (form/text-field {:placeholder "email"
+                          :class "login-input"} :email)]]
+      [:div {:class "login-row"}
+       (form/label {:class "login-label"} :password "password")
+       [:div {:class "login-input-container"}
+        (form/password-field {:placeholder "password"
+                              :class "login-input"} :password)]]
+      (form/submit-button {:class "submit-button"} "submit"))))
 
 
 (defresource login [ctx]
@@ -256,27 +257,26 @@
   :handle-ok (fn [ctx] (login-page ctx)))
 
 (defn registration-page [ctx]
-  (page ctx "register"
-    [:div {:class "main"}
-     [:h2 "register"]
-     (show-errors ctx)
-     (form-to
-       {:class "registration-form"}
-       [:post "/register"]
-       (anti-forgery/anti-forgery-field)
-       [:div {:class "registration-row"}
-        (form/label {:class "registration-label"} :email "email")
-        [:div {:class "registration-input-container"}
-         (form/text-field {:class "registration-input" :placeholder "email"} :email)]]
-       [:div {:class "registration-row"}
-        (form/label {:class "registration-label"} :password "password")
-        [:div {:class "registration-input-container"}
-         (form/password-field {:class "registration-input" :placeholder "password"} :password)]]
-       [:div {:class "registration-row"}
-        (form/label {:class "registration-label"} :repeat-password "confirm password")
-        [:div {:class "registration-input-container"}
-         (form/password-field {:class "registration-input" :placeholder "confirm password"} :confirmation)]]
-       (form/submit-button {:class "submit-button"} "submit"))]))
+  (default-page ctx "register"
+    [:h2 "register"]
+    (show-errors ctx)
+    (form-to
+      {:class "registration-form"}
+      [:post "/register"]
+      (anti-forgery/anti-forgery-field)
+      [:div {:class "registration-row"}
+       (form/label {:class "registration-label"} :email "email")
+       [:div {:class "registration-input-container"}
+        (form/text-field {:class "registration-input" :placeholder "email"} :email)]]
+      [:div {:class "registration-row"}
+       (form/label {:class "registration-label"} :password "password")
+       [:div {:class "registration-input-container"}
+        (form/password-field {:class "registration-input" :placeholder "password"} :password)]]
+      [:div {:class "registration-row"}
+       (form/label {:class "registration-label"} :repeat-password "confirm password")
+       [:div {:class "registration-input-container"}
+        (form/password-field {:class "registration-input" :placeholder "confirm password"} :confirmation)]]
+      (form/submit-button {:class "submit-button"} "submit"))))
 
 (defresource register [ctx]
   (validation-required validate-registration registration-page)
@@ -323,37 +323,38 @@
                         (when identity
                           {:location (path-for routes :rings)}))
   :handle-ok (fn [{:keys [db identity] :as ctx}]
-               (page ctx "welcome 2 coolring.club"
-                 [:div {:class "container"}
-                  [:h2 "welcome 2 the future"]
-                  [:p "create your own webring!"]
-                  [:link {:rel "import" :href "cool.html"}]
-                  [:p
-                   (image {:class "homepage-image"} (img-asset "webring.gif") "webring")]
-                  [:marquee [:p "\"wow. very cool. i am impressed!\" - internet magazine"]]])))
+               (layout ctx "welcome 2 coolring.club"
+                 [:div {:class "app"}
+                  (nav ctx)
+                  [:div {:class "container"}
+                   [:h2 "welcome 2 the future"]
+                   [:p "create your own webring!"]
+                   [:link {:rel "import" :href "cool.html"}]
+                   [:p
+                    (image {:class "homepage-image"} (img-asset "webring.gif") "webring")]
+                   [:marquee [:p "\"wow. very cool. i am impressed!\" - internet magazine"]]]])))
 
 (defn new-site-page [ctx]
-  (page ctx "submit site"
+  (default-page ctx "submit site"
     (let [ring (:ring ctx)]
-      [:div {:class "main"}
-       [:h2 (:name ring)]
-       [:h3 "submit site"]
-       (show-errors ctx)
-       (form-to
-         {:class "site-form"}
-         [:post (str "/rings/" (:id ring) "/sites")]
-         (anti-forgery/anti-forgery-field)
-         [:div {:class "site-row"}
-          (form/label {:class "site-label"} :url "url")
-          [:div {:class "site-input-container"}
-           (form/text-field {:placeholder "url"
-                             :class "site-input"} :url)]]
-         [:div {:class "site-row"}
-          (form/label {:class "site-label"} :name "name")
-          [:div {:class "site-input-container"}
-           (form/text-field {:placeholder "name"
-                             :class "site-input"} :name)]]
-         (form/submit-button {:class "submit-button"} "submit"))])))
+      [:h2 (:name ring)]
+      [:h3 "submit site"]
+      (show-errors ctx)
+      (form-to
+        {:class "site-form"}
+        [:post (str "/rings/" (:id ring) "/sites")]
+        (anti-forgery/anti-forgery-field)
+        [:div {:class "site-row"}
+         (form/label {:class "site-label"} :url "url")
+         [:div {:class "site-input-container"}
+          (form/text-field {:placeholder "url"
+                            :class "site-input"} :url)]]
+        [:div {:class "site-row"}
+         (form/label {:class "site-label"} :name "name")
+         [:div {:class "site-input-container"}
+          (form/text-field {:placeholder "name"
+                            :class "site-input"} :name)]]
+        (form/submit-button {:class "submit-button"} "submit")))))
 
 (defresource create-site [ctx]
   (merge
@@ -368,11 +369,11 @@
                                                                :result-set-fn first})]
                  [false {:ring ring}])))
   :post! (fn [{:keys [db ring identity request]}]
-           (let [params (:params request)
-                 params (if (= (:id identity) (:owner_id ring))
-                          (assoc params :approved true)
-                          params)
-                 site (query/create-site<! (assoc params :ring_id (:id ring) :owner_id (:id identity)) {:connection db})]
+           (let [params   (:params request)
+                 approved (= (:id identity) (:owner_id ring))
+                 site (query/create-site<! (assoc params :ring_id (:id ring)
+                                             :owner_id (:id identity)
+                                             :approved approved) {:connection db})]
              (when site
                {:site site})))
   :post-redirect? (fn [{:keys [site]}]
@@ -389,3 +390,24 @@
                                                                :result-set-fn first})]
                  {:ring ring})))  
   :handle-ok new-site-page)
+
+(defn explore-page [{:keys [ring] :as ctx}]
+  (layout ctx "explore"
+    [:div {:class "explore-container"}
+     [:nav {:class "ring-toolbar"}
+      [:ul {:class "toolbar-list"}
+       [:li {:class "toolbar-list-item"} [:a {:id "previous" :class "toolbar-link" :href "http://coolguyradio.com"} "< "]]
+       [:li {:class "toolbar-list-item"} [:marquee [:a {:class "toolbar-link" :href "#"} (:name ring)]]]
+       [:li {:class "toolbar-list-item"} [:a {:id "next" :class "toolbar-link" :href "http://durstsans.com"} "    >"]]]]
+     [:iframe {:id "ring-iframe" :class "ring-iframe" :src "http://coolguyradio.com" :sandbox "" :security "restricted"}]]))
+
+(defresource explore [ctx]
+  :initialize-context (initialize-context ctx)
+  :available-media-types ["text/html"]
+  :allowed-methods [:get]
+  :exists? (fn [{:keys [db request]}]
+             (let [{:keys [route-params]} request]
+               (when-let [ring (query/ring-by-id route-params {:connection db
+                                                               :result-set-fn first})]
+                 {:ring ring})))  
+  :handle-ok explore-page)

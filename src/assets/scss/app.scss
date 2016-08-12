@@ -3,8 +3,10 @@
 @import "components";
 
 body {
-  
   font-family: $font-family-monospace;
+}
+
+.app {
   background-color: $body-bg;
   
   padding-top: 5rem;
