@@ -109,7 +109,7 @@
 }
 
 .login-input-container {
-  @extend .col-sm-5;
+  @extend .col-sm-8;
 }
 
 .login-input {
@@ -145,11 +145,11 @@
 }
 
 
-.ring-form {
+.ring-form, .site-form {
 
 }
 
-.ring-row {
+.ring-row, .site-row {
   @include make-row();
   @extend .form-group;
 }
@@ -158,20 +158,24 @@
   @extend .col-sm-5;
 }
 
-.ring-input {
+.site-input-container {
+  @extend .col-sm-10;
+}
+
+.ring-input, .site-input {
   @extend .form-control;
 }
 
-.ring-label {
+.ring-label, .site-label {
   @extend .col-sm-12;
   @extend .col-form-label;
 }
 
-.ring-list {
+.ring-list, .site-list {
   @extend .list-group;
 }
 
-.ring-item {
+.ring-item, .site-item {
   $ring-item-bg: #dadae2;
   @extend .list-group-item;
 

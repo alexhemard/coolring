@@ -40,7 +40,7 @@ id = :id
 
 -- name: create-site<!
 INSERT INTO sites
-(ring_id, name, url) VALUES (:ring_id, :name, :url)
+(ring_id, owner_id, name, url) VALUES (:ring_id, :owner_id, :name, :url)
 
 -- name: approve-site!
 UPDATE sites

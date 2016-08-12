@@ -30,7 +30,7 @@
   [[:required [:name]]])
 
 (def validate-site
-  [[:required [:url]]
+  [[:required [:url :name]]
    [:url [:url]]])
 
 (defn show-errors [ctx]
@@ -127,7 +127,6 @@
                        [:span name] [:div {:class "ring-action"} "delete"]))]])))
 
 (defresource ring [ctx]
-  authorization-required
   :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
   :exists? (fn [{:keys [db request] :as ctx}]
@@ -142,32 +141,31 @@
                  [:div {:class "main"}
                   [:h2 (:name ring)]
                   [:p (:description ring)]
-                  [:h2 "sites"
-                   [:ul
-                    (for [site sites]
-                      [:li
-                       (link-to {:target "_blank"} (str (:url site)) (:name site))])]]
-                  (link-to "/rings" "back")])))
+                  [:h2 "sites"]
+                  [:div {:class "site-list"}
+                   (for [site sites]
+                     (link-to {:class "site-item" :target "_blank"} (str (:url site)) (:name site)))]])))
 
 (defn new-ring-page [ctx]
   (page ctx "new web ring"
-    [:h2 "new ring"]
-    (show-errors ctx)
-    (form-to
-      {:class "ring-form"}
-      [:post "/rings"]
-      (anti-forgery/anti-forgery-field)
-      [:div {:class "ring-row"}
-       (form/label {:class "ring-label"} :name "name")
-       [:div {:class "ring-input-container"}
-        (form/text-field {:placeholder "webring name"
-                          :class "ring-input"} :name)]]
-      [:div {:class "ring-row"}
-       (form/label {:class "ring-label"} :description "description")
-       [:div {:class "ring-input-container"}
-        (form/text-field {:placeholder "description"
-                          :class "ring-input"} :description)]]
-      (form/submit-button {:class "submit-button"} "submit"))))
+    [:div {:class "main"}
+     [:h2 "new ring"]
+     (show-errors ctx)
+     (form-to
+       {:class "ring-form"}
+       [:post "/rings"]
+       (anti-forgery/anti-forgery-field)
+       [:div {:class "ring-row"}
+        (form/label {:class "ring-label"} :name "name")
+        [:div {:class "ring-input-container"}
+         (form/text-field {:placeholder "webring name"
+                           :class "ring-input"} :name)]]
+       [:div {:class "ring-row"}
+        (form/label {:class "ring-label"} :description "description")
+        [:div {:class "ring-input-container"}
+         (form/text-field {:placeholder "description"
+                           :class "ring-input"} :description)]]
+       (form/submit-button {:class "submit-button"} "submit"))]))
 
 (defresource create-ring [ctx]
   (merge
@@ -198,14 +196,6 @@
                  [:div {:class "main"}
                   [:h2 "settings"]
                   [:p "todo..."]])))
-
-(defresource new-site [ctx]
-  :initialize-context (initialize-context ctx)
-  :available-media-types ["text/html"]
-  :handle-ok (fn [ctx]
-               (page ctx "new site"
-                 [:div {:class "main"}
-                  [:h2 "todo"]])))
 
 (defresource approve-site [ctx]
   :authorization-required
@@ -341,3 +331,61 @@
                   [:p
                    (image {:class "homepage-image"} (img-asset "webring.gif") "webring")]
                   [:marquee [:p "\"wow. very cool. i am impressed!\" - internet magazine"]]])))
+
+(defn new-site-page [ctx]
+  (page ctx "submit site"
+    (let [ring (:ring ctx)]
+      [:div {:class "main"}
+       [:h2 (:name ring)]
+       [:h3 "submit site"]
+       (show-errors ctx)
+       (form-to
+         {:class "site-form"}
+         [:post (str "/rings/" (:id ring) "/sites")]
+         (anti-forgery/anti-forgery-field)
+         [:div {:class "site-row"}
+          (form/label {:class "site-label"} :url "url")
+          [:div {:class "site-input-container"}
+           (form/text-field {:placeholder "url"
+                             :class "site-input"} :url)]]
+         [:div {:class "site-row"}
+          (form/label {:class "site-label"} :name "name")
+          [:div {:class "site-input-container"}
+           (form/text-field {:placeholder "name"
+                             :class "site-input"} :name)]]
+         (form/submit-button {:class "submit-button"} "submit"))])))
+
+(defresource create-site [ctx]
+  (merge
+    authorization-required
+    (validation-required validate-site new-site-page))
+  :initialize-context (initialize-context ctx)
+  :allowed-methods [:post]
+  :available-media-types ["text/html"]
+  :exists? (fn [{:keys [db request]}]
+             (let [{:keys [route-params]} request]
+               (when-let [ring (query/ring-by-id route-params {:connection db
+                                                               :result-set-fn first})]
+                 [false {:ring ring}])))
+  :post! (fn [{:keys [db ring identity request]}]
+           (let [params (:params request)
+                 params (if (= (:id identity) (:owner_id ring))
+                          (assoc params :approved true)
+                          params)
+                 site (query/create-site<! (assoc params :ring_id (:id ring) :owner_id (:id identity)) {:connection db})]
+             (when site
+               {:site site})))
+  :post-redirect? (fn [{:keys [site]}]
+                    {:location (path-for routes :ring :id (:ring_id site))}))
+
+(defresource new-site [ctx]
+  authorization-required
+  :initialize-context (initialize-context ctx)
+  :available-media-types ["text/html"]
+  :allowed-methods [:get]
+  :exists? (fn [{:keys [db request]}]
+             (let [{:keys [route-params]} request]
+               (when-let [ring (query/ring-by-id route-params {:connection db
+                                                               :result-set-fn first})]
+                 {:ring ring})))  
+  :handle-ok new-site-page)
