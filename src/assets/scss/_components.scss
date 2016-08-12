@@ -1,13 +1,14 @@
+$container-border-color: #e6e8e8 #d7d9da #b5b5b5;
+
 %button {
   @extend .btn;
-  
   @include box-shadow(5px 5px lighten($btn-primary-color, 10%));
-  
+
   position: relative;
-  
+
   &:active {
     @include box-shadow(none !important);
-    
+
     top: 5px;
     left: 5px;
   }
@@ -15,11 +16,12 @@
 
 .main {
   @extend .container;
-  @include box-shadow(5px 5px darken($body-bg, 8%));
+  background-color: darken($gray-lightest, 7%);
+  border: 1px solid;
+  border-color: $container-border-color;
 
   padding: 2rem;
-  
-  background-color: darken($gray-lightest, 7%);
+
 }
 
 .alert {
@@ -70,7 +72,7 @@
   @include box-shadow(5px 5px darken($brand-info, 35%));
 
   color: white !important;
-  
+
   &:hover, &:active {
     color: white !important;
   }
@@ -82,7 +84,7 @@
   50% {text-shadow: 1px 1px chocolate;}
   75% {text-shadow: 1px 1px green;}
   100% {text-shadow: 1px 1px purple;}
-  
+
 }
 
 .brand {
@@ -90,7 +92,7 @@
 
   animation: rainbow 1s infinite;
   animation-timing-function: step-end;
-  
+
   color: white;
   font-weight: bold;
 
@@ -184,7 +186,8 @@
   color: black;
 
   background-color: $ring-item-bg;
-  @include box-shadow(1px 1px #bdbdbd);
+  border: 1px solid;
+  border-color: $container-border-color;
 
   &:hover {
     color: black;

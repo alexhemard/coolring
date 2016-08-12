@@ -1,4 +1,6 @@
 var gulp       = require('gulp');
+var browserify = require('browserify');
+var source     = require('vinyl-source-stream');
 var sass       = require('gulp-sass');
 var buster     = require('gulp-buster');
 var rename     = require('gulp-rename');
@@ -14,9 +16,10 @@ var vinylPaths = require('vinyl-paths');
 var paths = {
   sass_libs: ['node_modules'],
   sass:       'src/assets/scss/app.scss',
+  js:         'src/assets/js/app.js',
+  js_dir:     'resources/public/js',  
   css:        'resources/public/css/app.css',
   css_dir:    'resources/public/css',
-  js:         'resources/public/js/**/*.js',
   fonts:      'resources/public/fonts/*',
   images:     'resources/public/images/*'  
 }
@@ -58,7 +61,7 @@ gulp.task('rework', ['buster'], function () {
   return gulp.src(dest.css)
     .pipe(rework(reworkUrl(function(url) {
       var p    = path.parse(url)
-      var hash = busters["resources/public/assets" + url]
+      var hash = busters[dest.asset_dir + url]
 
       if(p.extname && p.extname.indexOf('.') == 0 && hash) {
         console.log(p);
@@ -90,8 +93,11 @@ gulp.task('css', ['sass'], function () {
 });
 
 gulp.task('js', function () {
-  return gulp.src(paths.js)
-    .pipe(gulp.dest(dest.js_dir))
+  return browserify(paths.js)
+    .transform("babelify", {presets: ["es2016"]})
+    .bundle()
+    .pipe(source('app.js'))
+    .pipe(gulp.dest(paths.js_dir))
 });
 
 gulp.task('fonts', function () {
@@ -119,6 +125,7 @@ gulp.task('clean', function() {
 
 gulp.task('watch', ['clean'], function() {
   gulp.watch("src/assets/scss/**/*", ['sass']);
+  gulp.watch("src/assets/js/**/*", ['js']);  
 });
 
-gulp.task('default', ['watch', 'sass']);
+gulp.task('default', ['watch', 'sass', 'js']);

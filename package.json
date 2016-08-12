@@ -9,6 +9,9 @@
 
   "dependencies": {
     "gulp": "3.9.1",
+    "babel-preset-es2016": "6.11.3",
+    "babelify": "7.3.0",
+    "browserify": "13.1.0",
     "gulp-sass": "2.3.2",
     "gulp-rename": "1.2.2",
     "gulp-buster": "1.0.2",
@@ -19,6 +22,8 @@
     "vinyl-paths": "2.1.0",
     "del": "2.2.1",
     "rework-plugin-url": "1.1.0",
+    "vinyl-source-stream": "1.1.0",
+    "page": "1.7.1",
     "bootstrap": "https://github.com/twbs/bootstrap/tarball/v4-dev"
   }
 }
