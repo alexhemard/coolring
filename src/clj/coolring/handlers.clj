@@ -7,7 +7,7 @@
             [hiccup.element     :refer [link-to image]]
             [hiccup.form        :refer [form-to] :as form]
             [ring.util.response :refer [content-type response]]
-            [cheshire.core      :as json]
+            [clojure.data.json  :as json]
             [bidi.bidi          :refer [path-for] :as bidi]
             [ring.util.anti-forgery :as anti-forgery]
             [jkkramer.verily :refer [validate]]
@@ -17,6 +17,11 @@
             [coolring.routes    :refer [routes]]
             [coolring.query     :as query]
             [coolring.assets    :refer [js-asset css-asset img-asset]]))
+
+(extend-type java.sql.Timestamp
+  json/JSONWriter
+  (-write [date out]
+  (json/-write (str date) out)))
 
 (def validate-registration
   [[:required [:email :password :confirmation]]
@@ -131,9 +136,24 @@
                     (link-to {:class "ring-item" :data-ring-id id} (path-for routes :ring :id id)
                       [:span name] [:div {:class "ring-action"} "delete"]))])))
 
+(defn ring-page [{:keys [ring sites] :as ctx}]
+  (default-page ctx (str (:name ring))
+    [:h2 (:name ring)]
+    [:p (:description ring)]
+    [:h2 "sites"]
+    [:div {:class "site-list"}
+     (for [site sites]
+       (link-to {:class "site-item" :target "_blank"} (str "/rings/" (:id ring) "/" (:url site)) (:name site)))]
+    [:a {:class "submit-button" :href (str "/rings/" (:id ring) "/submit")} "add site"]))
+
+(defn ring-json [{:keys [ring sites]}]
+  (-> ring
+    (assoc :sites sites)))
+
 (defresource ring [ctx]
   :initialize-context (initialize-context ctx)
-  :available-media-types ["text/html"]
+  :available-media-types ["text/html"
+                          "application/json"]
   :exists? (fn [{:keys [db request] :as ctx}]
              (let [{:keys [route-params]} request
                    ring (query/ring-by-id route-params {:connection db
@@ -141,15 +161,12 @@
                    sites (query/approved-sites-for-ring ring {:connection db})]
                {:ring ring
                 :sites sites}))
-  :handle-ok (fn [{:keys [ring sites] :as ctx}]
-               (default-page ctx (str (:name ring))
-                 [:h2 (:name ring)]
-                 [:p (:description ring)]
-                 [:h2 "sites"]
-                 [:div {:class "site-list"}
-                  (for [site sites]
-                    (link-to {:class "site-item" :target "_blank"} (str "/rings/" (:id ring) "/" (:url site)) (:name site)))]
-                 [:a {:class "submit-button" :href (str "/rings/" (:id ring) "/submit")} "add site"])))
+  :handle-ok (fn [{:keys [representation] :as ctx}]
+               (condp = (:media-type representation)
+                 "text/html"        (ring-page ctx)
+                 "application/json" (ring-json ctx)
+                 {:message "invalid content-type"
+                  :media-type (:media-type representation)})))
 
 (defn new-ring-page [ctx]
   (default-page ctx "new web ring"
@@ -392,21 +409,21 @@
                  {:ring ring})))  
   :handle-ok new-site-page)
 
-(defn explore-page [{:keys [ring site] :as ctx}]
-  (layout ctx "explore"
-    [:div {:class "explore-container"}
+(defn site-page [{:keys [ring site] :as ctx}]
+  (layout ctx "site"
+    [:div {:class "site-container"}
      [:nav {:class "ring-toolbar"}
       [:a {:class "toolbar-brand" :href "/"} "coolring.club"]
       [:div {:class "toolbar-main"}
-       [:div {:class "toolbar-previous"} [:a {:id "previous" :class "toolbar-link" :href "http://coolguyradio.com"} "⬅"]]       
+       [:div {:class "toolbar-previous"} [:a {:id "previous" :class "toolbar-link" :href "#"} "⬅"]]       
        [:div {:class "toolbar-status"}
         [:a {:class "toolbar-ring" :href (str "/rings/" (:id ring))} (:name ring)]
         [:marquee {:class "toolbar-current"} (:name site)]]
-       [:div {:class "toolbar-next"} [:a {:id "next" :class "toolbar-link" :href "http://durstsans.com"} "➡"]]       
+       [:div {:class "toolbar-next"} [:a {:id "next" :class "toolbar-link" :href "#"} "➡"]]       
        ]]
-     [:iframe {:id "ring-iframe" :class "ring-iframe" :src (:url site)}]]))
+     [:iframe {:id "ring-iframe" :class "ring-iframe" :src (:url site) :data-site-id (:id site)}]]))
 
-(defresource explore [ctx]
+(defresource site [ctx]
   :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
   :allowed-methods [:get]
@@ -425,4 +442,4 @@
                  {:ring ring
                   :site site}
                  [false {:ring ring}])))
-  :handle-ok explore-page)
+  :handle-ok site-page)

@@ -58,7 +58,7 @@
    :deactivate-site (h/deactivate-site ctx)
    :create-site     (h/create-site ctx)
    :submit-site     (h/new-site ctx)
-   :explore         (h/explore ctx)
+   :site            (h/site ctx)
    :not-found   (resources-maybe {:prefix "resources/public"})})
 
 (defn app [ctx]

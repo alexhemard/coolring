@@ -1,17 +1,30 @@
 page = require('page');
 
 const explore = function(ctx) {
-  console.log("loading");
-  const next   = document.getElementById('next');
-  const prev   = document.getElementById('previous');    
-  const iframe = document.getElementById('ring-iframe');
+  const next     = document.getElementById('next');
+  const prev     = document.getElementById('previous');    
+  const iframe   = document.getElementById('ring-iframe');
+  const ring     = ctx.ring;
+  const sites    = ctx.ring.sites;
+  const current  = sites.find((site) => iframe.getAttribute('data-site-id') == site.id);
+  const nextSite = sites.find((site) => site.id === current.next_site);
+  const prevSite = sites.find((site) => current.id === site.next_site);
 
+  next.href = nextSite.url;
+  next.setAttribute('data-site-id', nextSite.id);
+  prev.href = prevSite.url;
+  prev.setAttribute('data-site-id', prevSite.id);
+  
   const onClick = function(e) {
     e.preventDefault();
+    
+    const target  = e.target;
+    const current = sites.find((site) => site.id == target.getAttribute('data-site-id'));
 
-    console.log("sup");
-    const target = e.target;
-    iframe.src = target.href;
+    iframe.src = current.url;
+    iframe.setAttribute('data-site-id', current.id);
+    
+    explore(ctx);
   }
 
   prev.onclick = onClick;
@@ -19,15 +32,21 @@ const explore = function(ctx) {
 }
 
 const loadRing = function(ctx, next) {
-  console.log("loading");
-  next();
+  const ringId = ctx.params.id;
+  const req    = new XMLHttpRequest();
+  
+  req.open('GET', `/rings/${ringId}`, true);
+  req.setRequestHeader('Accept', 'application/json');
+  req.onload = function () {
+    if (req.status >= 200 && req.status < 400) {
+      const data = JSON.parse(req.responseText);
+      ctx.ring = data
+      
+      next();
+    }
+  }
+  req.send();
 }
-
-const rings = function(ctx) {
-  //
-}
-
-page('/rings', rings);
 
 page('/rings/:id/*', loadRing, explore);
 

@@ -15,5 +15,5 @@
                   [["/" [long :id]] [["" :ring]
                                      ["/submit" {:get :submit-site}]
                                      ["/sites"  {:post :create-site}]
-                                     [["/" [#".*" :url]] :explore]]]]]]
+                                     [["/" [#".*" :url]] :site]]]]]]
    true :not-found])
