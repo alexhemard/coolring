@@ -400,11 +400,11 @@
       [:div {:class "toolbar-main"}
        [:div {:class "toolbar-previous"} [:a {:id "previous" :class "toolbar-link" :href "http://coolguyradio.com"} "⬅"]]       
        [:div {:class "toolbar-status"}
-        [:div {:class "toolbar-ring"} (:name ring)]
+        [:a {:class "toolbar-ring" :href (str "/rings/" (:id ring))} (:name ring)]
         [:marquee {:class "toolbar-current"} (:name site)]]
        [:div {:class "toolbar-next"} [:a {:id "next" :class "toolbar-link" :href "http://durstsans.com"} "➡"]]       
        ]]
-     [:iframe {:id "ring-iframe" :class "ring-iframe" :src (:url site) :sandbox "" :security "restricted"}]]))
+     [:iframe {:id "ring-iframe" :class "ring-iframe" :src (:url site)}]]))
 
 (defresource explore [ctx]
   :initialize-context (initialize-context ctx)

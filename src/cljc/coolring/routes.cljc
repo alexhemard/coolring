@@ -13,7 +13,7 @@
                           :get  {"" :rings}}]
                   ["/new" :new-ring]
                   [["/" [long :id]] [["" :ring]
-                                     [["/" [#".*" :url]] :explore]
                                      ["/submit" {:get :submit-site}]
-                                     ["/sites"  {:post :create-site}]]]]]]
+                                     ["/sites"  {:post :create-site}]
+                                     [["/" [#".*" :url]] :explore]]]]]]
    true :not-found])

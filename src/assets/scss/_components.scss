@@ -247,29 +247,26 @@ $toolbar-height: 45px;
   @extend .brand;
   
   font-size: 14px;
-  line-height: 0.75em;  
+  line-height: 0.75em;
+  display: inline;
+  float: none;
 }
 
 .toolbar-status {
   float: none;
   height: ($toolbar-height - 8px);
   display: inline-block;
+  text-align: center;
 }
 
-.toolbar-previous {
+.toolbar-previous, .toolbar-next {
   line-height: 0.5em;
   font-weight: bold;
   display: inline-block;
   font-size: 46px;
+  position: relative;
+  bottom: 0.75rem;
 }
-
-.toolbar-next {
-  line-height: 0.5em;
-  font-weight: bold;
-  display: inline-block;
-  font-size: 46px;
-}
-
 
 .toolbar-link {
   color: white;
@@ -289,14 +286,13 @@ $toolbar-height: 45px;
 .toolbar-brand {
   @extend .brand;
 
-  font-size: 12px;
+  font-size: 18px;
   position: absolute;
-  left: 5px;
+  left: 1rem;
   top: 4px;
   line-height: 2em;
 }
 
 .toolbar-main {
   display: inline-block;
-  width: 60%;
 }
