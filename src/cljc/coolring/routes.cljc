@@ -9,11 +9,11 @@
                       :post :register}]
         [["sites/" [long :id]] {:post [["/approve"    :approve-site]
                                        ["/deactivate" :deactivate-site]]}]
-        ["rings" [[""    {:post {"" :create-ring}
+        ["rings" [[#{"" "/"}    {:post {"" :create-ring}
                           :get  {"" :rings}}]
                   ["/new" :new-ring]
                   [["/" [long :id]] [["" :ring]
-                                     ["/explore" :explore]
+                                     [["/" [#".*" :url]] :explore]
                                      ["/submit" {:get :submit-site}]
                                      ["/sites"  {:post :create-site}]]]]]]
    true :not-found])

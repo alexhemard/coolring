@@ -29,10 +29,10 @@ const rings = function(ctx) {
 
 page('/rings', rings);
 
-page('/rings/:id/explore', loadRing, explore);
+page('/rings/:id/*', loadRing, explore);
 
 document.addEventListener("DOMContentLoaded", function() {
-  console.log('loaded');
+  console.log('hey');
   page({click: false});
 });
 

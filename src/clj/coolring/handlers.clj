@@ -148,7 +148,8 @@
                  [:h2 "sites"]
                  [:div {:class "site-list"}
                   (for [site sites]
-                    (link-to {:class "site-item" :target "_blank"} (str (:url site)) (:name site)))])))
+                    (link-to {:class "site-item" :target "_blank"} (str "/rings/" (:id ring) "/" (:url site)) (:name site)))]
+                 [:a {:class "submit-button" :href (str "/rings/" (:id ring) "/submit")} "add site"])))
 
 (defn new-ring-page [ctx]
   (default-page ctx "new web ring"
@@ -345,15 +346,15 @@
         [:post (str "/rings/" (:id ring) "/sites")]
         (anti-forgery/anti-forgery-field)
         [:div {:class "site-row"}
-         (form/label {:class "site-label"} :url "url")
-         [:div {:class "site-input-container"}
-          (form/text-field {:placeholder "url"
-                            :class "site-input"} :url)]]
-        [:div {:class "site-row"}
          (form/label {:class "site-label"} :name "name")
          [:div {:class "site-input-container"}
           (form/text-field {:placeholder "name"
                             :class "site-input"} :name)]]
+        [:div {:class "site-row"}
+         (form/label {:class "site-label"} :url "url")
+         [:div {:class "site-input-container"}
+          (form/text-field {:placeholder "url"
+                            :class "site-input"} :url)]]        
         (form/submit-button {:class "submit-button"} "submit")))))
 
 (defresource create-site [ctx]
@@ -391,23 +392,37 @@
                  {:ring ring})))  
   :handle-ok new-site-page)
 
-(defn explore-page [{:keys [ring] :as ctx}]
+(defn explore-page [{:keys [ring site] :as ctx}]
   (layout ctx "explore"
     [:div {:class "explore-container"}
      [:nav {:class "ring-toolbar"}
-      [:ul {:class "toolbar-list"}
-       [:li {:class "toolbar-list-item"} [:a {:id "previous" :class "toolbar-link" :href "http://coolguyradio.com"} "< "]]
-       [:li {:class "toolbar-list-item"} [:marquee [:a {:class "toolbar-link" :href "#"} (:name ring)]]]
-       [:li {:class "toolbar-list-item"} [:a {:id "next" :class "toolbar-link" :href "http://durstsans.com"} "    >"]]]]
-     [:iframe {:id "ring-iframe" :class "ring-iframe" :src "http://coolguyradio.com" :sandbox "" :security "restricted"}]]))
+      [:a {:class "toolbar-brand" :href "/"} "coolring.club"]
+      [:div {:class "toolbar-main"}
+       [:div {:class "toolbar-previous"} [:a {:id "previous" :class "toolbar-link" :href "http://coolguyradio.com"} "⬅"]]       
+       [:div {:class "toolbar-status"}
+        [:div {:class "toolbar-ring"} (:name ring)]
+        [:marquee {:class "toolbar-current"} (:name site)]]
+       [:div {:class "toolbar-next"} [:a {:id "next" :class "toolbar-link" :href "http://durstsans.com"} "➡"]]       
+       ]]
+     [:iframe {:id "ring-iframe" :class "ring-iframe" :src (:url site) :sandbox "" :security "restricted"}]]))
 
 (defresource explore [ctx]
   :initialize-context (initialize-context ctx)
   :available-media-types ["text/html"]
   :allowed-methods [:get]
   :exists? (fn [{:keys [db request]}]
-             (let [{:keys [route-params]} request]
-               (when-let [ring (query/ring-by-id route-params {:connection db
-                                                               :result-set-fn first})]
-                 {:ring ring})))  
+             (let [{:keys [route-params]} request
+                   ring (query/ring-by-id
+                          route-params
+                          {:connection db
+                           :result-set-fn first})
+                   _ (log/info route-params)
+                   site (query/site-by-url {:ring_id (:id ring)
+                                            :url (:url route-params)}
+                          {:connection db
+                           :result-set-fn first})]
+               (if site
+                 {:ring ring
+                  :site site}
+                 [false {:ring ring}])))
   :handle-ok explore-page)

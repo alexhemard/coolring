@@ -175,6 +175,8 @@ $container-border-color: #e6e8e8 #d7d9da #b5b5b5;
 
 .ring-list, .site-list {
   @extend .list-group;
+
+  margin-bottom: 20px;
 }
 
 .ring-item, .site-item {
@@ -216,13 +218,17 @@ $toolbar-height: 45px;
 .explore-container {
   padding-top: $toolbar-height;
 }
+
 .ring-toolbar {
   @extend .navbar;
   @extend .navbar-fixed-top;
 
-  background-color: $brand-primary;
+  background-color: #1b272d;
+  color: white;
   height: $toolbar-height;
-  border-bottom: 2px solid #62bf94;
+  border-bottom: 2px solid #3661ff;
+  text-align: center;
+  padding: 4px;
 }
 
 .ring-iframe {
@@ -237,27 +243,60 @@ $toolbar-height: 45px;
   left: 0;
 }
 
-.toolbar-list {
-  @extend .nav;
-  @extend .navbar-nav;
-
-  line-height: 2em;
-  text-align: center;
+.toolbar-ring {
+  @extend .brand;
+  
+  font-size: 14px;
+  line-height: 0.75em;  
 }
 
-li.toolbar-list-item {
-  @extend .nav-item;
-  
-  display: inline-block !important;
-  float: none !important;
+.toolbar-status {
+  float: none;
+  height: ($toolbar-height - 8px);
+  display: inline-block;
+}
 
-  & marquee {
-    font-size: 1.25em;
-    font-weight: bold;
-    display: inline;
+.toolbar-previous {
+  line-height: 0.5em;
+  font-weight: bold;
+  display: inline-block;
+  font-size: 46px;
+}
+
+.toolbar-next {
+  line-height: 0.5em;
+  font-weight: bold;
+  display: inline-block;
+  font-size: 46px;
+}
+
+
+.toolbar-link {
+  color: white;
+
+  &:hover, &:active, &:focus {
+    color: aqua;
+    text-decoration: none;
   }
 }
 
-.toolbar-link {
-  color: $brand-inverse;
+.toolbar-current {
+  line-height: 1.5em;
+  position: relative;
+  bottom: 5px
+}
+
+.toolbar-brand {
+  @extend .brand;
+
+  font-size: 12px;
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  line-height: 2em;
+}
+
+.toolbar-main {
+  display: inline-block;
+  width: 60%;
 }

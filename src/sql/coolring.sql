@@ -38,6 +38,13 @@ FROM sites
 WHERE
 id = :id
 
+-- name: site-by-url
+SELECT *
+FROM sites
+WHERE
+ring_id = :ring_id
+AND url = :url
+
 -- name: create-site<!
 INSERT INTO sites
 (ring_id, owner_id, name, url, approved) VALUES (:ring_id, :owner_id, :name, :url, :approved)
