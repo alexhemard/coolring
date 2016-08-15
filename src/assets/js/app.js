@@ -23,12 +23,15 @@ const explore = function(ctx) {
 
     iframe.src = current.url;
     iframe.setAttribute('data-site-id', current.id);
+
+    prev.removeEventListener('click', arguments.callee);
+    next.removeEventListener('click', arguments.callee);
     
     page.show(`/rings/${ring.id}/${current.url}`)
   }
 
-  prev.onclick = onClick;
-  next.onclick = onClick;
+  prev.addEventListener('click', onClick);
+  next.addEventListener('click', onClick);  
 }
 
 const loadRing = function(ctx, next) {

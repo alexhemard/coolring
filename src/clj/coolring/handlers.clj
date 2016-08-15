@@ -415,11 +415,11 @@
      [:nav {:class "ring-toolbar"}
       [:a {:class "toolbar-brand" :href "/"} "coolring.club"]
       [:div {:class "toolbar-main"}
-       [:div {:class "toolbar-previous"} [:a {:id "previous" :class "toolbar-link" :href "#"} "⬅"]]       
+       [:div {:class "toolbar-previous"} [:a {:id "previous" :class "toolbar-link" :href "#"} "←"]]       
        [:div {:class "toolbar-status"}
         [:a {:class "toolbar-ring" :href (str "/rings/" (:id ring))} (:name ring)]
         [:marquee {:class "toolbar-current"} (:name site)]]
-       [:div {:class "toolbar-next"} [:a {:id "next" :class "toolbar-link" :href "#"} "➡"]]       
+       [:div {:class "toolbar-next"} [:a {:id "next" :class "toolbar-link" :href "#"} "→"]]       
        ]]
      [:iframe {:id "ring-iframe" :class "ring-iframe" :src (:url site) :data-site-id (:id site)}]]))
 
