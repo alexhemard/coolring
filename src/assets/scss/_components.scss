@@ -291,6 +291,12 @@ $toolbar-height: 45px;
   left: 1rem;
   top: 4px;
   line-height: 2em;
+
+  @include media-breakpoint-down(xs) {
+    font-size: 12px;
+    left: 5px;
+    top: -5px;
+  }
 }
 
 .toolbar-main {

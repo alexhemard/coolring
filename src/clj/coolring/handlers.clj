@@ -108,7 +108,7 @@
   (html5
     [:head
      [:meta {:charset "utf-8"}]
-     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+     [:meta {:name "viewport" :content "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"}]
      [:title (str "coolring.club | " title)]
      (include-js  (js-asset  "app.js"))
      (include-css (css-asset "app.css"))
