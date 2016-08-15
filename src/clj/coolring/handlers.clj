@@ -433,7 +433,6 @@
                           route-params
                           {:connection db
                            :result-set-fn first})
-                   _ (log/info route-params)
                    site (query/site-by-url {:ring_id (:id ring)
                                             :url (:url route-params)}
                           {:connection db
