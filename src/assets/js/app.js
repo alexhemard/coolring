@@ -16,16 +16,20 @@ const explore = function(ctx) {
   prev.setAttribute('data-site-id', prevSite.id);
 
   const onClick = function(e) {
+    e.stopPropagation();
     e.preventDefault();
 
     const target  = e.target;
     const current = sites.find((site) => site.id == target.getAttribute('data-site-id'));
-
+    const marquee = document.getElementsByClassName('toolbar-current')[0];
+    
     iframe.src = current.url;
     iframe.setAttribute('data-site-id', current.id);
 
+    marquee.innerHTML = current.name;
+    
     prev.removeEventListener('click', arguments.callee);
-    prev.removeEventListener('touchend', arguments.callee);
+    prev.removeEventListener('touch end', arguments.callee);
     next.removeEventListener('click', arguments.callee);
     next.removeEventListener('touchend', arguments.callee);
 

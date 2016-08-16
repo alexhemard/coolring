@@ -417,7 +417,7 @@
       [:div {:class "toolbar-main"}
        [:div {:class "toolbar-previous"} [:a {:id "previous" :class "toolbar-link" :href "#"} "←"]]       
        [:div {:class "toolbar-status"}
-        [:a {:class "toolbar-ring" :href (str "/rings/" (:id ring))} (:name ring)]
+        [:div {:class "toolbar-ring" :href (str "/rings/" (:id ring))} (:name ring)]
         [:marquee {:class "toolbar-current"} (:name site)]]
        [:div {:class "toolbar-next"} [:a {:id "next" :class "toolbar-link" :href "#"} "→"]]       
        ]]
